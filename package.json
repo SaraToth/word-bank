@@ -1,0 +1,23 @@
+{
+  "name": "word-bank",
+  "version": "1.0.0",
+  "description": "A web service to learn new words in Korean and store them in your own virtual notebook system for fast vocabulary acquisition.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SaraToth/word-bank.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SaraToth/word-bank/issues"
+  },
+  "homepage": "https://github.com/SaraToth/word-bank#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
