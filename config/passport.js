@@ -13,10 +13,7 @@ passport.use(
         try {
             const user = await prisma.user.findUnique({
                 where: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
+                    id: true, // Only pass the id into token for security
                 }
             });
             if (user) {
