@@ -4,7 +4,8 @@
   "description": "A web service to learn new words in Korean and store them in your own virtual notebook system for fast vocabulary acquisition.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "NODE_ENV=development && node --watch app.js",
+    "test": "NODE_ENV=test && jest"
   },
   "repository": {
     "type": "git",
