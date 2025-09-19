@@ -39,6 +39,7 @@ model User {
 model Category {
   id Int @id @default(autoincrement())
   type CategoryType
+  name String
   user User @relation(fields: [userId], references: [id])
   userId Int @map("user_id")
   slug String

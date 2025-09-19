@@ -1,12 +1,15 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
+const slugifyText = require("../utils/slugifyText");
 
 const main = async() => {
 
     const hashedPassword = await bcrypt.hash("AlphaBeta2@", 10);
+    const slug = slugifyText("My Words");
+
     // Create users
-    await prisma.user.create({
+    const ron = await prisma.user.create({
         data: {
             firstName: "ron",
             lastName: "weasley",
@@ -15,7 +18,7 @@ const main = async() => {
         }
     });
 
-    await prisma.user.create({
+    const harry = await prisma.user.create({
         data: {
             firstName: "harry",
             lastName: "potter",
@@ -24,7 +27,7 @@ const main = async() => {
         }
     });
 
-    await prisma.user.create({
+    const hermione = await prisma.user.create({
         data: {
             firstName: "hermione",
             lastName: "granger",
@@ -32,7 +35,15 @@ const main = async() => {
             password: hashedPassword,
         }
     });
-};
+
+    await prisma.category.createMany({
+        data: [
+            { type: "DEFAULT", userId: ron.id, name: "My Words", slug: slug },
+            { type: "DEFAULT", userId: harry.id, name: "My Words", slug: slug },
+            { type: "DEFAULT", userId: hermione.id, name: "My Words", slug: slug }
+        ]
+    });
+};;
 
 main()
     .then(async() => {
