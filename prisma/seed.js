@@ -11,8 +11,8 @@ const main = async() => {
     // Create users
     const ron = await prisma.user.create({
         data: {
-            firstName: "ron",
-            lastName: "weasley",
+            firstName: "Ron",
+            lastName: "Weasley",
             email: "ron@gmail.com",
             password: hashedPassword,
         }
@@ -20,8 +20,8 @@ const main = async() => {
 
     const harry = await prisma.user.create({
         data: {
-            firstName: "harry",
-            lastName: "potter",
+            firstName: "Harry",
+            lastName: "Potter",
             email: "harry@gmail.com",
             password: hashedPassword,
         }
@@ -29,13 +29,14 @@ const main = async() => {
 
     const hermione = await prisma.user.create({
         data: {
-            firstName: "hermione",
-            lastName: "granger",
+            firstName: "Hermione",
+            lastName: "Granger",
             email: "hermione@gmail.com",
             password: hashedPassword,
         }
     });
 
+    // Create default category for each user
     await prisma.category.createMany({
         data: [
             { type: "DEFAULT", userId: ron.id, name: "My Words", slug: slug },
