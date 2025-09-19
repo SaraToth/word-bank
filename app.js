@@ -3,7 +3,7 @@ const app = express();
 const cors = require("cors");
 require("dotenv").config();
 const authRouter = require("./routes/authRouter");
-const categoriesRouter = require("./routes/categoriesRouter");
+// const categoriesRouter = require("./routes/categoriesRouter");
 
 // General Middlewares
 app.use(
@@ -16,8 +16,8 @@ app.use(express.json()) // Parse incoming JSON payloads
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/categories", categoriesRouter);
-app.use("/", authRouter);
+// app.use("/categories", categoriesRouter);
+app.use("/user", authRouter);
 
 // 404 Handler
 app.use((req, res) => {
