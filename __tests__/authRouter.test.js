@@ -18,7 +18,7 @@ testApp.use(express.urlencoded({ extended: true}));
 // Route for testing
 testApp.use("/user", authRouter);
 
-// Test users
+// User to test signup
 const userNick = {
     firstName: "nick",
     lastName: "scratch",
@@ -27,25 +27,14 @@ const userNick = {
     confirmPassword: "A12thisisme@"
 };
 
-const userBella = {
-    firstName: "bella",
-    lastName: "swan",
-    email: "bella@gmail.com",
-    password: "A12thisisme@",
-    confirmPassword: "A12thisisme@"
-}
-
-// Signup Bella as a pre-existing user
-beforeEach( async() => {
-    await request(testApp)
-        .post("/user/signup")
-        .send(userBella);
-});
-
-// Delete all users in test database
-afterAll( async() => {
-    await prisma.user.deleteMany({})
-});
+// Existing user to test login
+const userHarry = {
+    firstName: "Harry",
+    lastName: "Potter",
+    email: "harry@gmail.com",
+    password: "AlphaBeta2@",
+    confirmPassword: "AlphaBeta2@"
+};
 
 
 describe("POST signup", () => {
@@ -66,11 +55,11 @@ describe("POST signup", () => {
         const response = await request(testApp)
             .post("/user/signup")
             .send({
-                firstName: "bella",
-                lastName: "swan",
-                email: "bella@gmail.com",
-                password: "A12thisisme@",
-                confirmPassword: "A12thisisme@"
+                firstName: userHarry.firstName,
+                lastName: userHarry.lastName,
+                email: userHarry.email,
+                password: userHarry.password,
+                confirmPassword: userHarry.confirmPassword
             })
             .expect("Content-Type", /json/)
             .expect(400);
@@ -87,6 +76,25 @@ describe("POST signup", () => {
         .expect(201);
 
         expect(response.body).toHaveProperty("message");
+
+        const user = await prisma.user.findUnique({
+            where: {
+                email: userNick.email
+            }
+        });
+
+        await prisma.category.deleteMany({
+            where: {
+                userId: user.id,
+            }
+        });
+
+        await prisma.user.delete({
+            where: {
+                id: user.id
+            }
+        });
+        
     })
 });
 
@@ -108,7 +116,7 @@ describe("POST login", () => {
         const response = await request(testApp)
         .post("/user/login")
         .send({
-            email: userBella.email,
+            email: userHarry.email,
             password: "thisisa#33badPassword"
         })
         .expect("Content-Type", /json/)
@@ -121,8 +129,8 @@ describe("POST login", () => {
         const response = await request(testApp)
         .post("/user/login")
         .send({
-            email: userBella.email,
-            password: userBella.password
+            email: userHarry.email,
+            password: userHarry.password
         })
         .expect("Content-Type", /json/)
         .expect(200);
