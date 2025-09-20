@@ -270,3 +270,7 @@ describe("Delete an existing category", () => {
         expect(check).toBe(null);
     })
 })
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});

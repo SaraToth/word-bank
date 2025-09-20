@@ -146,3 +146,7 @@ describe("POST login", () => {
         expect(typeof decoded.sub).toBe("number");
     })
 })
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});
