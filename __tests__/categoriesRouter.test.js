@@ -141,3 +141,67 @@ describe("Post a new category", () => {
 
     })
 })
+
+describe("Patch an existing category", () => {
+    let myCategory;
+
+    beforeEach( async() => {
+        const response = await request(testApp)
+            .post("/categories")
+            .send({category: "My test category"})
+            .expect("Content-type", /json/)
+            .expect(200);
+        
+        myCategory = response.body.category;
+        if (!myCategory?.id) {
+            throw new Error("Category creation failed");
+        }
+    });
+
+    afterEach( async() => {
+        if (myCategory?.id) {
+            await prisma.category.delete({
+                where: { id: myCategory.id }
+            });
+        }
+    });
+
+    it("Fails if validation fails", async() => {
+        const response = await request(testApp)
+            .patch(`/categories/${myCategory.id}`)
+            .send({
+                category: ""
+            })
+            .expect("Content-Type", /json/)
+            .expect(400);
+        
+        // Expected response properties:
+        expect(response.body).toHaveProperty("errors");
+        expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+
+    it("successfully renames category", async() => {
+        const response = await request(testApp)
+            .patch(`/categories/${myCategory.id}`)
+            .send({
+                category: "Patch wins"
+            })
+            .expect("Content-type", /json/)
+            .expect(200);
+
+        // Expected response properties:
+        expect(response.body).toHaveProperty("message");
+        expect(response.body).toHaveProperty("category");
+        
+        // Confirm name and slug changes:
+        expect(response.body.category.name).toBe("Patch Wins");
+        expect(response.body.category.slug).toBe("patch-wins");
+
+        // Expected category structure:
+        expect(response.body.category).toMatchObject({
+            id: expect.any(Number),
+            name: expect.any(String),
+            slug: expect.any(String)
+        })
+    })
+})
