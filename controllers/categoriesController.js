@@ -47,7 +47,8 @@ const getCategories = asyncHandler(async(req, res) => {
  * @returns {Promise<Response>} JSON response:
  *  - 401 { error: String} - if user's id (from jwt) does not exist
  *  - 400 { error: String } - when categoryId is not provided, or not a number
- *  - 403 { error: String } - user requests category owned by a different user
+ *  - 403 { error: String } - when user doesn't have access to requested category
+ *  - 404 { error: String } - when the category doesn't exist in db
  *  - 200 { message: String, categories: Object } - request succeeds
  * @throws {Error} if database look up fails
  */
@@ -66,18 +67,23 @@ const getSingleCategory = asyncHandler(async(req, res) => {
         return res.status(400).json({ error: "Bad request" });
     }
 
-    // Find the requested category
+    // Find the requested category, and ensure the user owns it
     const category = await prisma.category.findUnique({
         where: {
             id: categoryId
         },
-        select: { id: true, slug: true, name: true }
+        select: { id: true, slug: true, name: true, userId: true }
     });
 
-    // Confirm the category belongs to current user
+    // Check that the category exists
+    if (!category) {
+        return res.status(404).json({ error: "Sorry, we can't find that." });
+    }
+
+    // Confirm the current user owns that category
     if (category.userId !== userId) {
-        return res.status(403).json({ error: "You're not authorized to access that." });
-    };
+        return res.status(403).json({ error: "Unauthorized. You don't have access to that." });
+    }
 
     return res.status(200).json({ 
         message: `Category ${category.name} fetched successfully.`,
