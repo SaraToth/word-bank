@@ -84,7 +84,7 @@ const postSignup = [
  * @returns {Promise<Response>} - JSON response:
  * - 400: { errors: errors.array() } - Validation errors
  * - 400: { errors: "Bad request" } - User not found
- * - 200: { message: ""}
+ * - 200: { message: "String"} - Login sucessful and bearer token sent to client
  * @throws {Error} If password hashing or database insertion fails.
  */
 
