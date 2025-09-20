@@ -151,4 +151,78 @@ const postCategory = [
     }
 )];
 
-module.exports = { getCategories, getSingleCategory, postCategory };
+/**
+ * Renames the user's existing category
+ * 
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>} - JSON Response:
+ *  - 400 { errors: errors.array()} - validation fails
+ *  - 400 { error: String } - no category provide but passes validation
+ *  - 401 { error: String } - if user's id (from jwt) does not exist
+ *  - 200 { message: String, category: Object }
+ */
+const patchCategory = [
+    validateCategory,
+
+    asyncHandler(async(req, res) => {
+        // Handle valiation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array()});
+        }
+
+        // Access new name, and category's id from request
+        const newName = req.body.category;
+        const categoryId = parseInt(req.params.categoryId);
+
+        // In case empty input passes/skips validation
+        if (!newName) {
+            return res.status(400).json({ error: "Category name is required"});
+        } else if (!categoryId) {
+            return res.status(400).json({ error: "Category id is required" });
+        }
+
+        // Access current user id from json web token
+        const userId = parseInt(req.user.id);
+        if (!userId) {
+            return res.status(401).json({ error: "You must be logged in to access that." });
+        }
+
+        const category = await prisma.category.findUnique({ 
+            where: { id: categoryId}
+        });
+
+        // Confirm category exists
+        if (!category) {
+            return res.status(404).json({ error: "Category does not exist" });
+        }
+
+        // Confirm user has access to that category
+        if (category.userId !== userId) {
+            return res.status(403).json({ error: "Unauthorized. You don't have access to that" });
+        }
+
+        // Ensure that category is not a default
+        if (category.type === "DEFAULT") {
+            return res.status(403).json({ error: "Forbidden. Default category 'My Words' cannot be renamed" });
+        }
+
+        // Slug the new category
+        const slug = slugifyText(newName);
+
+        // Update the category name and slug
+        const newCategory = await prisma.category.update({
+            where: {id: category.id},
+            data: { name: newName, slug: slug },
+            select: { id: true, name: true, slug: true }
+        });
+
+        return res.status(200).json({ 
+            message: `Category successfully renamed to ${newName}`,
+            category:  newCategory
+        });
+    })
+];
+
+module.exports = { getCategories, getSingleCategory, postCategory, patchCategory };

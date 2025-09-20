@@ -1,5 +1,6 @@
 const { body } = require("express-validator");
 const prisma = require("../prisma/client");
+const toProperNoun = require("./toProperNoun");
 
 const validateCategory = [
     body("category")
@@ -7,6 +8,7 @@ const validateCategory = [
         .notEmpty().withMessage("Must enter a name").bail()
         .isLength({ min: 1}).withMessage("Must be at least one character in length").bail()
         .matches(/^[a-zA-Z0-9 ]+$/).withMessage("Must contain only letters, numbers or spaces").bail()
+        .customSanitizer(toProperNoun)
         .custom(async(value, {req}) => {
             const existingCategory = await prisma.category.findFirst({
                 where: {
