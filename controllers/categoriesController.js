@@ -17,7 +17,7 @@ const asyncHandler = require("express-async-handler");
 const getCategories = asyncHandler(async(req, res) => {
 
     // Access current user id from json web token
-    const userId = req.user.id;
+    const userId = parseInt(req.user.id);
     if (!userId) {
         return res.status(401).json({ message: "You must be logged in to access that." });
     }
