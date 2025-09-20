@@ -198,6 +198,8 @@ const patchCategory = [
             return res.status(404).json({ error: "Category does not exist" });
         }
 
+        const oldName = category.name;
+
         // Confirm user has access to that category
         if (category.userId !== userId) {
             return res.status(403).json({ error: "Unauthorized. You don't have access to that" });
@@ -219,7 +221,7 @@ const patchCategory = [
         });
 
         return res.status(200).json({ 
-            message: `Category successfully renamed to ${newName}`,
+            message: `Category successfully renamed ${oldName} to ${newName}`,
             category:  newCategory
         });
     })
