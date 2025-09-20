@@ -262,6 +262,7 @@ describe("Delete an existing category", () => {
             where: { id: id}
         });
 
+        // Confirm deletion
         const check = await prisma.category.findFirst({
             where: { id: id}
         });
