@@ -227,4 +227,47 @@ const patchCategory = [
     })
 ];
 
-module.exports = { getCategories, getSingleCategory, postCategory, patchCategory };
+const deleteCategory = asyncHandler( async(req, res) => {
+    // Access current user id from json web token
+    const userId = parseInt(req.user.id);
+    if (!userId) {
+        return res.status(401).json({ error: "You must be logged in to access that." });
+    }
+    const categoryId = parseInt(req.params.categoryId);
+
+    // Confirm categoryId is provided
+    if (!categoryId) {
+        return res.status(404).json({ error: "Category id is required"});
+    }
+
+    // Retrieve category
+    const category = await prisma.category.findFirst({
+        where: { id: categoryId }
+    });
+
+    // Confirm category exists in db
+    if (!category) {
+        return res.status(404).json({ error: "Category does not exist"});
+    }
+
+    // Confirm user has access
+    if (category.userId !== userId) {
+        return res.status(403).json({ error: "Forbidden. You don't have access"});
+    }
+
+    // Confirm the category is not type default
+    if (category.type === "DEFAULT") {
+        return res.status(403).json({ error: "Forbidden. Default category 'My Words' cannot be deleted"});
+    }
+
+    // Delete category
+    await prisma.category.delete({
+        where: { id: category.id}
+    });
+
+    return res.status(200).json({ 
+        message: `Deleted ${category.name} successful`
+    });
+})
+
+module.exports = { getCategories, getSingleCategory, postCategory, patchCategory, deleteCategory };
