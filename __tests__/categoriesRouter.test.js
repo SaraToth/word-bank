@@ -2,13 +2,21 @@
  * Test file for categoriesRouter.js and the corresponding categoriesController.js
  */
 
+// Mock verifyToken passing
+jest.mock("../middleware/verifyToken", () => {
+    return (req, res, next) => {
+        req.user = { id: 1 }; // Ron Weasley
+        next();
+    }
+});
+
 const categoriesRouter = require("../routes/categoriesRouter");
 const request = require("supertest");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const prisma = require("../prisma/client");
-const verifyToken = require("../middleware/verifyToken");
+
 
 // Creates a test app seperate from app.js
 const testApp = express();
@@ -20,13 +28,6 @@ testApp.use(express.urlencoded({ extended: true}));
 // Route for testing
 testApp.use("/categories", categoriesRouter);
 
-// Mock verifyToken passing
-jest.mock("../middleware/verifyToken", () => {
-    return (req, res, next) => {
-        req.user = { id: 1 }; // Ron Weasley
-        next();
-    }
-});
 
 describe("GET categories", () => {
     it("Gets the categories for current user", async() => {
@@ -94,4 +95,49 @@ describe("GET single category", () => {
         
         expect(response.body).toHaveProperty("error");
     });
+})
+
+describe("Post a new category", () => {
+    it("Fails if validation fails", async() => {
+        const response = await request(testApp)
+            .post("/categories")
+            .send({
+                category: ""
+            })
+            .expect("Content-type", /json/)
+            .expect(400);
+    
+        expect(response.body).toHaveProperty("errors");
+        expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+
+    it("Returns the newly created category if it succeeds", async() => {
+        const response = await request(testApp)
+            .post("/categories")
+            .send({ 
+                category: "My new folder"
+            })
+            .expect("Content-Type", /json/)
+            .expect(200);
+
+        // Expected response properties:
+        expect(response.body).toHaveProperty("message");
+        expect(response.body).toHaveProperty("category");
+
+        // Expected category structure:
+        expect(response.body.category).toMatchObject({
+            id: expect.any(Number),
+            slug: expect.any(String),
+            name: expect.any(String)
+        });
+
+        // Delete test category
+        const newCategory = response.body.category;
+        await prisma.category.delete({
+            where: {
+                id: newCategory.id
+            }
+        });
+
+    })
 })
