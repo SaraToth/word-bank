@@ -1,7 +1,7 @@
 const prisma = require("../prisma/client");
 const asyncHandler = require("express-async-handler");
 const validateCategory = require("../utils/validateCategory");
-const { validationResult } = require("express-async-handler")
+const { validationResult } = require("express-validator");
 const slugifyText = require("../utils/slugifyText");
 
 // Type definitions
