@@ -5,7 +5,7 @@ const validateCategory = [
     body("category")
         .trim()
         .notEmpty().withMessage("Must enter a name").bail()
-        .matches(/^[a-zA-Z0-9 ]+$/).withMessage("Must contain only letters, numbers or spaces")
+        .matches(/^[a-zA-Z0-9 ]+$/).withMessage("Must contain only letters, numbers or spaces").bail()
         .custom(async(value, {req}) => {
             const existingCategory = await prisma.category.findFirst({
                 where: {
