@@ -180,6 +180,18 @@ describe("Patch an existing category", () => {
         expect(Array.isArray(response.body.errors)).toBe(true);
     });
 
+    it("Fails if category type is DEFAULT", async() => {
+        const response = await request(testApp)
+            .patch("/categories/1") // Ron's default category
+            .send({
+                category: "tra la"
+            })
+            .expect("Content-type", /json/)
+            .expect(403);
+
+        expect(response.body).toHaveProperty("error");
+    })
+
     it("successfully renames category", async() => {
         const response = await request(testApp)
             .patch(`/categories/${myCategory.id}`)
@@ -203,5 +215,57 @@ describe("Patch an existing category", () => {
             name: expect.any(String),
             slug: expect.any(String)
         })
+    })
+})
+
+describe("Delete an existing category", () => {
+    it("Fails if the category doesn't exist", async() => {
+        const response = await request(testApp)
+            .delete(`/categories/10000`)
+            .expect("Content-type", /json/) 
+            .expect(404);
+
+        expect(response.body).toHaveProperty("error");
+    });
+
+    it("Fails user doesn't have access", async() => {
+        const response = await request(testApp)
+            .delete("/categories/3") // Ron tries to delete Hermione's
+            .expect("Content-type", /json/) 
+            .expect(403);
+        
+        expect(response.body).toHaveProperty("error");
+    });
+
+    it("Fails if the category is a DEFAULT type", async() => {
+        const response = await request(testApp)
+            .delete("/categories/1") // Ron's default category
+            .expect("Content-type", /json/)
+            .expect(403);
+
+        expect(response.body).toHaveProperty("error");
+    })
+
+    it("Succeeds when delete request is valid", async() => {
+        // Create a category to delete
+        const response = await request(testApp)
+            .post("/categories")
+            .send({
+                category: "This is for deleting"
+            })
+            .expect("Content-type", /json/)
+            .expect(200);
+        
+        // Delete category
+        const id = response.body.category.id;
+        await prisma.category.delete({
+            where: { id: id}
+        });
+
+        const check = await prisma.category.findFirst({
+            where: { id: id}
+        });
+
+        expect(check).toBe(null);
     })
 })
