@@ -1,5 +1,8 @@
 const prisma = require("../prisma/client");
 const asyncHandler = require("express-async-handler");
+const validateCategory = require("../utils/validateCategory");
+const { validationResult } = require("express-async-handler")
+const slugifyText = require("../utils/slugifyText");
 
 // Type definitions
 /**
@@ -87,41 +90,65 @@ const getSingleCategory = asyncHandler(async(req, res) => {
 
     return res.status(200).json({ 
         message: `Category ${category.name} fetched successfully.`,
-        category: category
+        category: {
+            id: category.id,
+            slug: category.slug,
+            name: category.name
+        }
     });
 });
 
-// /**
-//  * Creates a new category for current user
-//  * 
-//  * @param {Request} req 
-//  * @param {Response} res
-//  * @returns {Promise<Response>} JSON response:
-//  */
-// const postCategories = (req, res) => {
+/**
+ * Posts a new category to the database for current user
+ * 
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>} JSON Response:
+ *  - 400 { errors: errors.array()} - Validation fails
+ *  - 400 { error: String } - Form input missing after passing validation
+ *  - 401 { error: String } - if user's id (from jwt) does not exist
+ *  - 200 { message: String, category: Object } - request succeeds
+ */
+const postCategory = [
+    validateCategory,
 
-// };
+    asyncHandler(async(req, res) => {
+        // Handle valiation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array()});
+        }
 
-// /**
-//  * Renames one of the user's existing categories
-//  * 
-//  * @param {Request} req 
-//  * @param {Response} res
-//  * @returns {Promise<Response>} JSON response:
-//  */
-// const patchCategories = (req, res) => {
+        // In case empty input passes/skips validation
+        const categoryName = req.body.category;
+        if (!categoryName) {
+            return res.status(400).json({ error: "Category name is required"});
+        }
 
-// };
+        // Access current user id from json web token
+        const userId = parseInt(req.user.id);
+        if (!userId) {
+            return res.status(401).json({ error: "You must be logged in to access that." });
+        }
 
-// /**
-//  * Deletes a user's category
-//  * 
-//  * @param {Request} req 
-//  * @param {Response} res
-//  * @returns {Promise<Response>} JSON response:
-//  */
-// const deleteCategories = (req, res) => {
+        // Slug the new category
+        const slug = slugifyText(categoryName);
 
-// };
+        // Create the category
+        const category = await prisma.category.create({
+            data: {
+                type: "CUSTOM",
+                name: categoryName,
+                slug: slug,
+                userId: userId
+            }
+        });
 
-module.exports = { getCategories, getSingleCategory };
+        return res.status(200).json({ 
+            message: "New category successfully created",
+            category: { id: category.id, slug: category.slug, name: category.name }
+        });
+    }
+)];
+
+module.exports = { getCategories, getSingleCategory, postCategory };
