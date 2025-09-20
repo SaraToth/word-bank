@@ -1,4 +1,5 @@
 const prisma = require("../prisma/client");
+const asyncHandler = require("express-async-handler");
 
 // Type definitions
 /**
@@ -13,41 +14,54 @@ const prisma = require("../prisma/client");
  * @param {Response} res
  * @returns {Promise<Response>} JSON response:
  */
-const getCategories = (req, res) => {
+const getCategories = asyncHandler(async(req, res) => {
 
-};
+    // Access current user id from json web token
+    const userId = req.user.id;
+    if (!userId) {
+        return res.status(401).json({ message: "You must be logged in to access that." });
+    }
 
-/**
- * Creates a new category for current user
- * 
- * @param {Request} req 
- * @param {Response} res
- * @returns {Promise<Response>} JSON response:
- */
-const postCategories = (req, res) => {
+    // Get the list of categories from the database
+    const categories = await prisma.category.findMany({
+        where: { userId: userId },
+        select: { id: true, slug: true, name: true }
+    });
 
-};
+    return res.status(200).json({ message: "Categories fetched successfully", categories: categories});
+});
 
-/**
- * Renames one of the user's existing categories
- * 
- * @param {Request} req 
- * @param {Response} res
- * @returns {Promise<Response>} JSON response:
- */
-const patchCategories = (req, res) => {
+// /**
+//  * Creates a new category for current user
+//  * 
+//  * @param {Request} req 
+//  * @param {Response} res
+//  * @returns {Promise<Response>} JSON response:
+//  */
+// const postCategories = (req, res) => {
 
-};
+// };
 
-/**
- * Deletes a user's category
- * 
- * @param {Request} req 
- * @param {Response} res
- * @returns {Promise<Response>} JSON response:
- */
-const deleteCategories = (req, res) => {
+// /**
+//  * Renames one of the user's existing categories
+//  * 
+//  * @param {Request} req 
+//  * @param {Response} res
+//  * @returns {Promise<Response>} JSON response:
+//  */
+// const patchCategories = (req, res) => {
 
-};
+// };
 
-module.exports = { getCategories, postCategories, patchCategories, deleteCategories };
+// /**
+//  * Deletes a user's category
+//  * 
+//  * @param {Request} req 
+//  * @param {Response} res
+//  * @returns {Promise<Response>} JSON response:
+//  */
+// const deleteCategories = (req, res) => {
+
+// };
+
+module.exports = { getCategories};
