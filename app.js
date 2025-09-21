@@ -2,8 +2,11 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
+
+// Routers
 const authRouter = require("./routes/authRouter");
 const categoriesRouter = require("./routes/categoriesRouter");
+const languagesRouter = require("./routes/languagesRouter");
 
 // General Middlewares
 app.use(
@@ -16,6 +19,7 @@ app.use(express.json()) // Parse incoming JSON payloads
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+app.use("/languages", languagesRouter);
 app.use("/categories", categoriesRouter);
 app.use("/user", authRouter);
 
