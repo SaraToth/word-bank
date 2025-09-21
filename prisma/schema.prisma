@@ -41,6 +41,7 @@ model Language {
   l2 LanguageCode  // L2 is the foreign language
   categories Category[]
   words Word[]
+  @@unique([l1, l2]) // Language pairs are unique
   @@map("languages")
 }
 
