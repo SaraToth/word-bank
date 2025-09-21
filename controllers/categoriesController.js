@@ -144,8 +144,9 @@ const getSingleCategory = asyncHandler(async(req, res) => {
  * @param {Response} res
  * @returns {Promise<Response>} JSON Response:
  *  - 400 { errors: errors.array()} - Validation fails
- *  - 400 { error: String } - Form input missing after passing validation
+ *  - 400 { error: String } - Form input missing after passing validation, or missing pairId
  *  - 401 { error: String } - if user's id (from jwt) does not exist
+ *  - 404 { error: String } - language pair doesn't exist in db
  *  - 200 { message: String, category: Object } - request succeeds
  */
 const postCategory = [
@@ -170,6 +171,22 @@ const postCategory = [
             return res.status(401).json({ error: "You must be logged in to access that." });
         }
 
+        // Gets the language pair from path
+        const pairId = parseInt(req.params.pairId);
+        if (!pairId || Number.isNaN(pairId)) {
+            return res.status(400).json({ error: "language pair not selected or not a number"});
+        }
+
+        // Access language pair in db
+        const langPair = await prisma.language.findUnique({
+            where: { id: pairId}
+        });
+
+        // Check language pair exists
+        if (langPair === null) {
+            return res.status(404).json({ message: "Language pair does not exist"});
+        }
+
         // Slug the new category
         const slug = slugifyText(categoryName);
 
@@ -179,13 +196,15 @@ const postCategory = [
                 type: "CUSTOM",
                 name: categoryName,
                 slug: slug,
-                userId: userId
-            }
+                userId: userId,
+                languageId: langPair.id
+            },
+            select: { id: true, slug: true, name: true }
         });
 
         return res.status(200).json({ 
             message: "New category successfully created",
-            category: { id: category.id, slug: category.slug, name: category.name }
+            category: category
         });
     }
 )];
