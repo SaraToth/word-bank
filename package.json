@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "NODE_ENV=development && node --watch app.js",
     "test": "NODE_ENV=test && jest",
-    "test:languages": "NODE_ENV=test jest __tests__/languagesRouter.test.js"
+    "test:lang": "NODE_ENV=test jest __tests__/languagesRouter.test.js",
+    "test:auth": "NODE_ENV=test jest __tests__/authRouter.test.js",
+    "test:cat": "NODE_ENV=test jest __tests__/categoriesRouter.test.js",
+    "test:word": "NODE_ENV=test jest __tests__/wordsRouter.test.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
