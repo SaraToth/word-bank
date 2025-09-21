@@ -268,22 +268,6 @@ const deleteCategory = asyncHandler( async(req, res) => {
         return res.status(404).json({ error: "Category id is required"});
     }
 
-    // // Gets the language pair from path
-    // const pairId = parseInt(req.params.pairId);
-    // if (!pairId || Number.isNaN(pairId)) {
-    //     return res.status(400).json({ error: "language pair not selected"});
-    // }
-
-    // // Access language pair in db
-    // const langPair = await prisma.language.findUnique({
-    //     where: { id: pairId}
-    // });
-
-    // // Check language pair exists
-    // if (langPair === null) {
-    //     return res.status(404).json({ message: "Language pair does not exist"});
-    // }
-
     // Retrieve category
     const category = await prisma.category.findFirst({
         where: { id: categoryId, languageId: req.pairId }
