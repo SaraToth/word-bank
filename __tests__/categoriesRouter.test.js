@@ -156,7 +156,7 @@ describe("Patch an existing category", () => {
 
     beforeEach( async() => {
         const response = await request(testApp)
-            .post("/categories")
+            .post("/languages/1/categories")
             .send({category: "My test category"})
             .expect("Content-type", /json/)
             .expect(200);
@@ -177,7 +177,7 @@ describe("Patch an existing category", () => {
 
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .patch(`/categories/${myCategory.id}`)
+            .patch(`/languages/1/categories/${myCategory.id}`)
             .send({
                 category: ""
             })
@@ -189,9 +189,21 @@ describe("Patch an existing category", () => {
         expect(Array.isArray(response.body.errors)).toBe(true);
     });
 
+    it("Fails if language pair is not a match", async() => {
+        const response = await request(testApp)
+            .patch(`/languages/2/categories/${myCategory.id}`)
+            .send({
+                category: "Patch wins"
+            })
+            .expect("Content-type", /json/)
+            .expect(400);
+
+        expect(response.body).toHaveProperty("error");
+    })
+
     it("Fails if category type is DEFAULT", async() => {
         const response = await request(testApp)
-            .patch("/categories/1") // Ron's default category
+            .patch("/languages/1/categories/1") // Ron's default category
             .send({
                 category: "tra la"
             })
@@ -203,7 +215,7 @@ describe("Patch an existing category", () => {
 
     it("successfully renames category", async() => {
         const response = await request(testApp)
-            .patch(`/categories/${myCategory.id}`)
+            .patch(`/languages/1/categories/${myCategory.id}`)
             .send({
                 category: "Patch wins"
             })
