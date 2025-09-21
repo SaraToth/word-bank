@@ -22,19 +22,12 @@ const slugifyText = require("../utils/slugifyText");
  *  - 401 { error: String} - if user's id (from jwt) does not exist
  *  - 404: { error: String } - if the lang pair is not in the db
  *  - 200 { message: String, categories: Object } - request succeeds
- * @throws {Error} if database lookup fails
  */
 const getCategories = asyncHandler(async(req, res) => {
 
-    // Access current user id from json web token
-    const userId = parseInt(req.user.id);
-    if (!userId) {
-        return res.status(401).json({ error: "You must be logged in to access that." });
-    }
-
     // Get the list of categories from the database
     const categories = await prisma.category.findMany({
-        where: { userId: userId, languageId: req.pairId },
+        where: { userId: req.userId, languageId: req.pairId },
         select: { id: true, slug: true, name: true }
     });
 
@@ -58,12 +51,6 @@ const getCategories = asyncHandler(async(req, res) => {
  * @throws {Error} if database look up fails
  */
 const getSingleCategory = asyncHandler(async(req, res) => {
-    // Access current user id from json web token
-    const userId = parseInt(req.user.id);
-    if (!userId) {
-        return res.status(401).json({ error: "You must be logged in to access that." });
-    }
-
     // Access categoryId from request path
     const categoryId = parseInt(req.params.categoryId);
 
@@ -86,7 +73,7 @@ const getSingleCategory = asyncHandler(async(req, res) => {
     }
 
     // Confirm the current user owns that category
-    if (category.userId !== userId) {
+    if (category.userId !== req.userId) {
         return res.status(403).json({ error: "Unauthorized. You don't have access to that." });
     }
 
@@ -133,12 +120,6 @@ const postCategory = [
             return res.status(400).json({ error: "Category name is required"});
         }
 
-        // Access current user id from json web token
-        const userId = parseInt(req.user.id);
-        if (!userId) {
-            return res.status(401).json({ error: "You must be logged in to access that." });
-        }
-
         // Slug the new category
         const slug = slugifyText(categoryName);
 
@@ -148,7 +129,7 @@ const postCategory = [
                 type: "CUSTOM",
                 name: categoryName,
                 slug: slug,
-                userId: userId,
+                userId: req.userId,
                 languageId: req.pairId
             },
             select: { id: true, slug: true, name: true }
@@ -194,12 +175,6 @@ const patchCategory = [
             return res.status(400).json({ error: "Category id is required" });
         }
 
-        // Access current user id from json web token
-        const userId = parseInt(req.user.id);
-        if (!userId) {
-            return res.status(401).json({ error: "You must be logged in to access that." });
-        }
-
         const category = await prisma.category.findUnique({ 
             where: { id: categoryId}
         });
@@ -212,7 +187,7 @@ const patchCategory = [
         const oldName = category.name;
 
         // Confirm user has access to that category
-        if (category.userId !== userId) {
+        if (category.userId !== req.userId) {
             return res.status(403).json({ error: "Unauthorized. You don't have access to that" });
         }
 
@@ -256,11 +231,6 @@ const patchCategory = [
  *  - 200 { message: String } - successful deletion
  */
 const deleteCategory = asyncHandler( async(req, res) => {
-    // Access current user id from json web token
-    const userId = parseInt(req.user.id);
-    if (!userId) {
-        return res.status(401).json({ error: "You must be logged in to access that." });
-    }
     const categoryId = parseInt(req.params.categoryId);
 
     // Confirm categoryId is provided
@@ -279,7 +249,7 @@ const deleteCategory = asyncHandler( async(req, res) => {
     }
 
     // Confirm user has access
-    if (category.userId !== userId) {
+    if (category.userId !== req.userId) {
         return res.status(403).json({ error: "Forbidden. You don't have access"});
     }
 
