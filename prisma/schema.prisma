@@ -12,6 +12,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 enum CategoryType {
   DEFAULT
   CUSTOM
@@ -36,26 +37,39 @@ model User {
   @@map("users")
 }
 
+model Language {
+  id Int @id @default(autoincrement())
+  l1 String @map("lang_one") // L1 is the native language
+  l2 String @map("lang_two")  // L2 is the foreign language
+  categories Category[]
+  words Word[]
+  @@map("languages")
+}
+
 model Category {
   id Int @id @default(autoincrement())
   type CategoryType
   name String
+  slug String
   user User @relation(fields: [userId], references: [id])
   userId Int @map("user_id")
-  slug String
+  language Language @relation(fields: [languageId], references: [id])
+  languageId Int @map("language_id")
   words Word[] @relation("CategoryWords")
-  @@unique([userId, slug]) // Slug must be unique only to that user
+  @@unique([userId, slug, languageId]) // slug and language unique to user per language
   @@map("categories")
 }
 
 model Word {
   id Int @id @default(autoincrement())
   user User @relation(fields: [userId], references: [id])
-  userId Int @map("author_id")
+  userId Int @map("user_id")
+  language Language @relation(fields: [languageId], references: [id])
+  languageId Int @map("language_id")
   categories Category[] @relation("CategoryWords")
-  kr String
-  en String
-  example String?
+  l1Word String @map("l1_word") // L2 word
+  l2Word String @map("l2_word") // L1 definition
+  example String? // Optional example sentence using L2 word
   reviews ReviewProcess[]
   @@map("words")
 }
