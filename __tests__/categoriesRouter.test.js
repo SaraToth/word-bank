@@ -26,13 +26,13 @@ testApp.use(express.json());
 testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
-testApp.use("/categories", categoriesRouter);
+testApp.use("/languages/:pairId/categories", categoriesRouter);
 
 
 describe("GET categories", () => {
     it("Gets the categories for current user", async() => {
         const response = await request(testApp)
-            .get("/categories")
+            .get("/languages/1/categories")
             .expect("Content-Type", /json/)
             .expect(200);
         
