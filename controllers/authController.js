@@ -3,8 +3,6 @@ const prisma = require("../prisma/client");
 const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
-const slugifyText = require("../utils/slugifyText");
-const toProperNoun = require("../utils/toProperNoun");
 
 // Type definitions
 /**
@@ -20,7 +18,7 @@ const validateLogin = require("../utils/validateLogin");
  * Handles user signup
  * 
  * - Validates user input and returns 400 if validation fails.
- * - Creates a new user in the database and a new default category, if valid.
+ * - Creates a new user in the database if valid.
  * 
  * @param {Request} req
  * @param {Response} res
@@ -54,20 +52,6 @@ const postSignup = [
                 password: hashedPassword,
             }
         });
-
-        // Designates a default category, and it's slug
-        const defaultCategory = toProperNoun("my words");
-        const slug = slugifyText(defaultCategory);
-
-        // Create a default "My words" category in database
-        await prisma.category.create({
-            data: {
-                type: "DEFAULT",
-                name: defaultCategory,
-                userId: newUser.id,
-                slug: slug,
-            }
-        })
 
         return res.status(201).json({ message: "New user signup successful"});
     })
