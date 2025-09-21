@@ -242,7 +242,7 @@ describe("Patch an existing category", () => {
 describe("Delete an existing category", () => {
     it("Fails if the category doesn't exist", async() => {
         const response = await request(testApp)
-            .delete(`/categories/10000`)
+            .delete(`/languages/1/categories/10000`)
             .expect("Content-type", /json/) 
             .expect(404);
 
@@ -251,7 +251,7 @@ describe("Delete an existing category", () => {
 
     it("Fails user doesn't have access", async() => {
         const response = await request(testApp)
-            .delete("/categories/3") // Ron tries to delete Hermione's
+            .delete("/languages/1/categories/3") // Ron tries to delete Hermione's
             .expect("Content-type", /json/) 
             .expect(403);
         
@@ -260,7 +260,7 @@ describe("Delete an existing category", () => {
 
     it("Fails if the category is a DEFAULT type", async() => {
         const response = await request(testApp)
-            .delete("/categories/1") // Ron's default category
+            .delete("/languages/1/categories/1") // Ron's default category
             .expect("Content-type", /json/)
             .expect(403);
 
@@ -270,7 +270,7 @@ describe("Delete an existing category", () => {
     it("Succeeds when delete request is valid", async() => {
         // Create a category to delete
         const response = await request(testApp)
-            .post("/categories")
+            .post("/languages/1/categories")
             .send({
                 category: "This is for deleting"
             })
