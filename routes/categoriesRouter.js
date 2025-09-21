@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const categoriesRouter = Router();
+const categoriesRouter = Router({ mergeParams: true }); // Access req.params.pairId
 const verifyToken = require("../middleware/verifyToken");
 const { getCategories, getSingleCategory, postCategory, patchCategory, deleteCategory } = require("../controllers/categoriesController");
 const wordsRouter = require("./wordsRouter");

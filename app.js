@@ -5,7 +5,7 @@ require("dotenv").config();
 
 // Routers
 const authRouter = require("./routes/authRouter");
-const categoriesRouter = require("./routes/categoriesRouter");
+// const categoriesRouter = require("./routes/categoriesRouter");
 const languagesRouter = require("./routes/languagesRouter");
 
 // General Middlewares
@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/languages", languagesRouter);
-app.use("/categories", categoriesRouter);
+// app.use("/categories", categoriesRouter);
 app.use("/user", authRouter);
 
 // 404 Handler
