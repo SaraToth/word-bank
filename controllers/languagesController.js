@@ -2,7 +2,7 @@ const prisma = require("../prisma/client");
 const asyncHandler = require("express-async-handler");
 const validateLang = require("../utils/validateLang");
 const { validationResult } = require("express-validator");
-const toProperNounn = require("../utils/toProperNoun");
+const toProperNoun = require("../utils/toProperNoun");
 const slugifyText = require("../utils/slugifyText");
 
 // Type definitions
@@ -31,12 +31,6 @@ const setUpLanguage = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array()});
-        }
-
-        // Access current user id from json web token
-        const userId = parseInt(req.user.id);
-        if (!userId) {
-            return res.status(401).json({ error: "You must be logged in to access that." });
         }
 
         // Access language codes from form body
@@ -68,7 +62,7 @@ const setUpLanguage = [
                 type: "DEFAULT",
                 slug: slug,
                 languageId: langPair.id,
-                userId: userId
+                userId: req.userId
             },
             select: {
                 id: true, name: true, slug: true

@@ -4,9 +4,11 @@ const verifyToken = require("../middleware/verifyToken");
 const categoriesRouter = require("../routes/categoriesRouter");
 const { setUpLanguage } = require("../controllers/languagesController");
 const processLangPair = require("../middleware/processLangPair");
+const confirmLogin = require("../middleware/confirmLogin");
 
 // Protect routes with user authentication
 languagesRouter.use(verifyToken);
+languagesRouter.use(confirmLogin);
 
 languagesRouter.use("/:pairId/categories", processLangPair, categoriesRouter);
 
