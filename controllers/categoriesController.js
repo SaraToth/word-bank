@@ -216,8 +216,9 @@ const postCategory = [
  * @param {Response} res
  * @returns {Promise<Response>} - JSON Response:
  *  - 400 { errors: errors.array()} - validation fails
- *  - 400 { error: String } - no category provide but passes validation
+ *  - 400 { error: String } - no category provide but passes validation, pairId missing, or language pair incorrect
  *  - 401 { error: String } - if user's id (from jwt) does not exist
+ *  - 404 { error: String } - language pair doesn't exist in db
  *  - 200 { message: String, category: Object }
  */
 const patchCategory = [
@@ -247,6 +248,22 @@ const patchCategory = [
             return res.status(401).json({ error: "You must be logged in to access that." });
         }
 
+        // Gets the language pair from path
+        const pairId = parseInt(req.params.pairId);
+        if (!pairId || Number.isNaN(pairId)) {
+            return res.status(400).json({ error: "language pair not selected"});
+        }
+
+        // Access language pair in db
+        const langPair = await prisma.language.findUnique({
+            where: { id: pairId}
+        });
+
+        // Check language pair exists
+        if (langPair === null) {
+            return res.status(404).json({ message: "Language pair does not exist"});
+        }
+
         const category = await prisma.category.findUnique({ 
             where: { id: categoryId}
         });
@@ -261,6 +278,11 @@ const patchCategory = [
         // Confirm user has access to that category
         if (category.userId !== userId) {
             return res.status(403).json({ error: "Unauthorized. You don't have access to that" });
+        }
+
+        // Confirm the category matches language pair
+        if (category.languageId !== pairId) {
+            return res.status(400).json({ error: "Bad request"});
         }
 
         // Ensure that category is not a default
