@@ -97,5 +97,6 @@ model ReviewProcess {
   interval Int @default(1) // in days
   easeFactor Float @default(2.5) @map("ease_factor")
   repetition Int @default(0)
-  grade Grade? 
+  grade Grade?
+  @@map("review_process")
 }
