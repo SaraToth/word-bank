@@ -32,25 +32,9 @@ const getCategories = asyncHandler(async(req, res) => {
         return res.status(401).json({ error: "You must be logged in to access that." });
     }
 
-    // Gets the language pair from path
-    const pairId = parseInt(req.params.pairId);
-    if (!pairId || Number.isNaN(pairId)) {
-        return res.status(400).json({ error: "language pair not selected"});
-    }
-
-    // Access language pair from db
-    const langPair = await prisma.language.findUnique({
-        where: { id: pairId}
-    });
-
-    // Check language pair exists
-    if (langPair === null) {
-        return res.status(404).json({ message: "Language pair does not exist"});
-    }
-
     // Get the list of categories from the database
     const categories = await prisma.category.findMany({
-        where: { userId: userId, languageId: langPair.id },
+        where: { userId: userId, languageId: req.pairId },
         select: { id: true, slug: true, name: true }
     });
 
@@ -80,22 +64,6 @@ const getSingleCategory = asyncHandler(async(req, res) => {
         return res.status(401).json({ error: "You must be logged in to access that." });
     }
 
-    // Gets the language pair from path
-    const pairId = parseInt(req.params.pairId);
-    if (!pairId || Number.isNaN(pairId)) {
-        return res.status(400).json({ error: "language pair not selected"});
-    }
-
-    // Access language pair in db
-    const langPair = await prisma.language.findUnique({
-        where: { id: pairId}
-    });
-
-    // Check language pair exists
-    if (langPair === null) {
-        return res.status(404).json({ message: "Language pair does not exist"});
-    }
-
     // Access categoryId from request path
     const categoryId = parseInt(req.params.categoryId);
 
@@ -107,7 +75,7 @@ const getSingleCategory = asyncHandler(async(req, res) => {
     // Find the requested category, and ensure the user owns it
     const category = await prisma.category.findUnique({
         where: {
-            id: categoryId
+            id: categoryId,
         },
         select: { id: true, slug: true, name: true, userId: true, languageId: true }
     });
@@ -123,7 +91,7 @@ const getSingleCategory = asyncHandler(async(req, res) => {
     }
 
     // Confirm the category matches current language pair
-    if (category.languageId !== langPair.id) {
+    if (category.languageId !== req.pairId) {
         return res.status(400).json({ error: "You cannot access a category from a seperate language pair"});
     }
 
@@ -171,22 +139,6 @@ const postCategory = [
             return res.status(401).json({ error: "You must be logged in to access that." });
         }
 
-        // Gets the language pair from path
-        const pairId = parseInt(req.params.pairId);
-        if (!pairId || Number.isNaN(pairId)) {
-            return res.status(400).json({ error: "language pair not selected or not a number"});
-        }
-
-        // Access language pair in db
-        const langPair = await prisma.language.findUnique({
-            where: { id: pairId}
-        });
-
-        // Check language pair exists
-        if (langPair === null) {
-            return res.status(404).json({ message: "Language pair does not exist"});
-        }
-
         // Slug the new category
         const slug = slugifyText(categoryName);
 
@@ -197,7 +149,7 @@ const postCategory = [
                 name: categoryName,
                 slug: slug,
                 userId: userId,
-                languageId: langPair.id
+                languageId: req.pairId
             },
             select: { id: true, slug: true, name: true }
         });
@@ -248,22 +200,6 @@ const patchCategory = [
             return res.status(401).json({ error: "You must be logged in to access that." });
         }
 
-        // Gets the language pair from path
-        const pairId = parseInt(req.params.pairId);
-        if (!pairId || Number.isNaN(pairId)) {
-            return res.status(400).json({ error: "language pair not selected"});
-        }
-
-        // Access language pair in db
-        const langPair = await prisma.language.findUnique({
-            where: { id: pairId}
-        });
-
-        // Check language pair exists
-        if (langPair === null) {
-            return res.status(404).json({ message: "Language pair does not exist"});
-        }
-
         const category = await prisma.category.findUnique({ 
             where: { id: categoryId}
         });
@@ -281,7 +217,7 @@ const patchCategory = [
         }
 
         // Confirm the category matches language pair
-        if (category.languageId !== pairId) {
+        if (category.languageId !== req.pairId) {
             return res.status(400).json({ error: "Bad request"});
         }
 
@@ -332,25 +268,25 @@ const deleteCategory = asyncHandler( async(req, res) => {
         return res.status(404).json({ error: "Category id is required"});
     }
 
-    // Gets the language pair from path
-    const pairId = parseInt(req.params.pairId);
-    if (!pairId || Number.isNaN(pairId)) {
-        return res.status(400).json({ error: "language pair not selected"});
-    }
+    // // Gets the language pair from path
+    // const pairId = parseInt(req.params.pairId);
+    // if (!pairId || Number.isNaN(pairId)) {
+    //     return res.status(400).json({ error: "language pair not selected"});
+    // }
 
-    // Access language pair in db
-    const langPair = await prisma.language.findUnique({
-        where: { id: pairId}
-    });
+    // // Access language pair in db
+    // const langPair = await prisma.language.findUnique({
+    //     where: { id: pairId}
+    // });
 
-    // Check language pair exists
-    if (langPair === null) {
-        return res.status(404).json({ message: "Language pair does not exist"});
-    }
+    // // Check language pair exists
+    // if (langPair === null) {
+    //     return res.status(404).json({ message: "Language pair does not exist"});
+    // }
 
     // Retrieve category
     const category = await prisma.category.findFirst({
-        where: { id: categoryId, languageId: langPair.id }
+        where: { id: categoryId, languageId: req.pairId }
     });
 
     // Confirm category exists in db
