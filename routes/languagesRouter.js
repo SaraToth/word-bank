@@ -10,7 +10,7 @@ const confirmLogin = require("../middleware/confirmLogin");
 languagesRouter.use(verifyToken);
 languagesRouter.use(confirmLogin);
 
-languagesRouter.use("/:pairId/categories", processLangPair, categoriesRouter);
+languagesRouter.use("/:languagesSlug/categories", processLangPair, categoriesRouter);
 
 // Set up a new language pair for the current user:
 languagesRouter.post("/", setUpLanguage);

@@ -22,26 +22,34 @@ const asyncHandler = require("express-async-handler");
  */
 const processLangPair = asyncHandler( async(req, res, next) => {
 
-    // Gets the language pair from path
-    const pairId = parseInt(req.params.pairId);
+    // // Gets the language pair from path
+    // const pairId = parseInt(req.params.pairId);
 
+    // Gets the language pair from path and sanitize:
+    const { languagesSlug } = req.params;
+
+    // Split into two:
+    const [l1, l2] = languagesSlug.toUpperCase().split("-");
 
     // Confirm it exists
-    if (!pairId || Number.isNaN(pairId)) {
-        return res.status(400).json({ error: "Either language pair is missing or invalid"});
+    if (!l1 || !l2) {
+        return res.status(400).json({ error: "Missing languages"});
     }
 
     // Access language pair in db
-    const langPair = await prisma.language.findUnique({
-        where: { id: pairId}
+    const pair = await prisma.language.findUnique({
+        where: { l1_l2: {
+            l1: l1,
+            l2: l2
+        }},
     });
 
     // Check language pair exists
-    if (langPair === null) {
+    if (pair === null) {
         return res.status(404).json({ message: "Language pair does not exist"});
     }
 
-    req.pairId = langPair.id;
+    req.pairId = pair.id;
 
     next();
 });
