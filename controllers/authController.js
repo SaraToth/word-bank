@@ -44,7 +44,7 @@ const postSignup = [
         const hashedPassword = await bcrypt.hash(password, 10); // 10 is salt#
 
         // Create new user in database
-        const newUser = await prisma.user.create({
+        await prisma.user.create({
             data: {
                 firstName: firstName,
                 lastName: lastName,
