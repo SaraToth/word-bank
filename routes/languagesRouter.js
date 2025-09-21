@@ -7,7 +7,7 @@ const { setUpLanguage } = require("../controllers/languagesController");
 // Protect routes with user authentication
 languagesRouter.use(verifyToken);
 
-languagesRouter.use("/:pariId/categories", categoriesRouter);
+languagesRouter.use("/:pairId/categories", categoriesRouter);
 
 // Set up a new language pair for the current user:
 languagesRouter.post("/", setUpLanguage);

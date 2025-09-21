@@ -34,15 +34,16 @@ const getCategories = asyncHandler(async(req, res) => {
 
     // Gets the language pair from path
     const pairId = parseInt(req.params.pairId);
-    if (!pairId) {
+    if (!pairId || Number.isNaN(pairId)) {
         return res.status(400).json({ error: "language pair not selected"});
     }
 
-    // Check pairId exists
+    // Access language pair from db
     const langPair = await prisma.language.findUnique({
         where: { id: pairId}
     });
 
+    // Check language pair exists
     if (langPair === null) {
         return res.status(404).json({ message: "Language pair does not exist"});
     }
@@ -66,7 +67,7 @@ const getCategories = asyncHandler(async(req, res) => {
  * @param {Response} res
  * @returns {Promise<Response>} JSON response:
  *  - 401 { error: String} - if user's id (from jwt) does not exist
- *  - 400 { error: String } - when categoryId is not provided, or not a number
+ *  - 400 { error: String } - when categoryId is not provided, or not a number, or pairId does not match categoryId
  *  - 403 { error: String } - when user doesn't have access to requested category
  *  - 404 { error: String } - when the category doesn't exist in db
  *  - 200 { message: String, categories: Object } - request succeeds
@@ -77,6 +78,22 @@ const getSingleCategory = asyncHandler(async(req, res) => {
     const userId = parseInt(req.user.id);
     if (!userId) {
         return res.status(401).json({ error: "You must be logged in to access that." });
+    }
+
+    // Gets the language pair from path
+    const pairId = parseInt(req.params.pairId);
+    if (!pairId || Number.isNaN(pairId)) {
+        return res.status(400).json({ error: "language pair not selected"});
+    }
+
+    // Access language pair in db
+    const langPair = await prisma.language.findUnique({
+        where: { id: pairId}
+    });
+
+    // Check language pair exists
+    if (langPair === null) {
+        return res.status(404).json({ message: "Language pair does not exist"});
     }
 
     // Access categoryId from request path
@@ -92,7 +109,7 @@ const getSingleCategory = asyncHandler(async(req, res) => {
         where: {
             id: categoryId
         },
-        select: { id: true, slug: true, name: true, userId: true }
+        select: { id: true, slug: true, name: true, userId: true, languageId: true }
     });
 
     // Check that the category exists
@@ -103,6 +120,11 @@ const getSingleCategory = asyncHandler(async(req, res) => {
     // Confirm the current user owns that category
     if (category.userId !== userId) {
         return res.status(403).json({ error: "Unauthorized. You don't have access to that." });
+    }
+
+    // Confirm the category matches current language pair
+    if (category.languageId !== langPair.id) {
+        return res.status(400).json({ error: "You cannot access a category from a seperate language pair"});
     }
 
     return res.status(200).json({ 
