@@ -71,8 +71,8 @@ model Word {
   language Language @relation(fields: [languageId], references: [id])
   languageId Int @map("language_id")
   categories Category[] @relation("CategoryWords")
-  l1Word String @map("l1_word") // L2 word
-  l2Word String @map("l2_word") // L1 definition
+  l1Word String @map("l1_word") // L1 word
+  l2Word String @map("l2_word") // L2 definition
   example String? // Optional example sentence using L2 word
   reviews ReviewProcess[]
   @@map("words")
