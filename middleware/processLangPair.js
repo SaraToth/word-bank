@@ -1,6 +1,25 @@
 const prisma = require("../prisma/client");
 const asyncHandler = require("express-async-handler");
 
+
+// Type definitions
+/**
+ * @typedef {import("express").Request} Request
+ * @typedef {import("express").Response} Response
+ * @typedef {import("express").NextFunction } NextFunction
+*/
+
+/**
+ * 
+ * @param {Request} req 
+ * @param {Response} res
+ * @param { NextFunction } next
+ * @returns {Promise<Response>} JSON Response:
+ *  - 400: { error: String } - if pairId is not passed in path
+ *  - 401 { error: String} - if user's id (from jwt) does not exist
+ *  - 404: { error: String } - if the lang pair is not in the db
+ *  - 200 { message: String, categories: Object } - request succeeds
+ */
 const processLangPair = asyncHandler( async(req, res, next) => {
 
     // Gets the language pair from path
