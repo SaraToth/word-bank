@@ -12,7 +12,8 @@
     "test:word": "NODE_ENV=test jest __tests__/wordsRouter.test.js"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "seed:test": "cross-env NODE_ENV=test node prisma/tests_seed.js"
   },
   "repository": {
     "type": "git",
