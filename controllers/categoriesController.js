@@ -307,6 +307,18 @@ const patchCategory = [
     })
 ];
 
+/**
+ * Deletes an existing category for the current user
+ * 
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>} JSON Response:
+ *  - 400: { error: String } - missing pairId from path
+ *  - 401: { error: String } - missing userId, 
+ *  - 403: { error: String } - unauthorized user, category is type DEFAULT
+ *  - 404: { error: String } - missing categoryId from path, lang pair doesn't exist in db
+ *  - 200 { message: String } - successful deletion
+ */
 const deleteCategory = asyncHandler( async(req, res) => {
     // Access current user id from json web token
     const userId = parseInt(req.user.id);
@@ -320,9 +332,25 @@ const deleteCategory = asyncHandler( async(req, res) => {
         return res.status(404).json({ error: "Category id is required"});
     }
 
+    // Gets the language pair from path
+    const pairId = parseInt(req.params.pairId);
+    if (!pairId || Number.isNaN(pairId)) {
+        return res.status(400).json({ error: "language pair not selected"});
+    }
+
+    // Access language pair in db
+    const langPair = await prisma.language.findUnique({
+        where: { id: pairId}
+    });
+
+    // Check language pair exists
+    if (langPair === null) {
+        return res.status(404).json({ message: "Language pair does not exist"});
+    }
+
     // Retrieve category
     const category = await prisma.category.findFirst({
-        where: { id: categoryId }
+        where: { id: categoryId, languageId: langPair.id }
     });
 
     // Confirm category exists in db
