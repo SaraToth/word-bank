@@ -52,7 +52,7 @@ describe("GET categories", () => {
 describe("GET single category", () => {
     it("Gets a single category per the current user's request", async() => {
         const response = await request(testApp)
-            .get("/categories/1") // Get Ron Weasley's default category
+            .get("/languages/1/categories/1") // Get Ron Weasley's default category
             .expect("Content-Type", /json/)
             .expect(200);
         
@@ -70,7 +70,7 @@ describe("GET single category", () => {
 
     it("Fails when provided categoryId is not a number", async() => {
         const response = await request(testApp)
-            .get("/categories/abc")
+            .get("/languages/1/categories/abc")
             .expect("Content-Type", /json/)
             .expect(400);
 
@@ -80,7 +80,7 @@ describe("GET single category", () => {
 
     it("Fails when user requests a category they don't own", async() => {
         const response = await request(testApp)
-            .get("/categories/3") // Ron is requesting Hermione's category
+            .get("/languages/1/categories/3") // Ron is requesting Hermione's category
             .expect("Content-Type", /json/)
             .expect(403);
         
@@ -89,18 +89,27 @@ describe("GET single category", () => {
 
     it("Fails when user requests a category that doesn't exist", async() => {
         const response = await request(testApp)
-            .get("/categories/100") // Does not exist
+            .get("/languages/1/categories/100") // Does not exist
             .expect("Content-Type", /json/)
             .expect(404);
         
         expect(response.body).toHaveProperty("error");
     });
+
+    it("Fails when category id is not associated with the pairId", async() => {
+        const response = await request(testApp)
+            .get("/languages/2/categories/1")
+            .expect("Content-type", /json/)
+            .expect(400);
+
+        expect(response.body).toHaveProperty("error");
+    })
 })
 
 describe("Post a new category", () => {
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .post("/categories")
+            .post("/languages/1/categories")
             .send({
                 category: ""
             })
@@ -113,7 +122,7 @@ describe("Post a new category", () => {
 
     it("Returns the newly created category if it succeeds", async() => {
         const response = await request(testApp)
-            .post("/categories")
+            .post("/languages/1/categories")
             .send({ 
                 category: "My new folder"
             })
