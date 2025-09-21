@@ -7,7 +7,7 @@ const validateWord = [
         .withMessage("You must provide a word")
         .bail()
         .customSanitizer(value => value.replace(/\s+/g, ' ').trim()) // normalizes spaces due to different alphabets
-        .matches(/^[\p{L}\s]+$/u) // isAlpha check for ALL alphabets
+        .matches(/^[\p{L}\p{Zs}-]+$/u) // isAlpha check for ALL alphabets
         .withMessage("Must only contain letters")
         .bail()
         .isLength({ min: 1, max: 50})
@@ -21,7 +21,7 @@ const validateWord = [
         .withMessage("You must provide a word")
         .bail()
         .customSanitizer(value => value.replace(/\s+/g, ' ').trim()) // normalizes spaces due to different alphabets
-        .matches(/^[\p{L}\p{Zs}]+$/u) // isAlpha check for ALL alphabets
+        .matches(/^[\p{L}\p{Zs}-]+$/u) // isAlpha check for ALL alphabets
         .withMessage("Must only contain letters")
         .bail()
         .isLength({ min: 1, max: 50})
@@ -33,7 +33,7 @@ const validateWord = [
         .trim()
         .optional({ checkFalsy: true }) // Only validate when its provided
         .customSanitizer(value => value.replace(/\s+/g, ' ').trim()) // normalizes spaces due to different alphabets
-        .matches(/^[\p{L}\p{N}\s.,!?:;"'’\-()]+$/u) // isAlpha check for ALL alphabets
+        .matches(/^[\p{L}\p{N}\p{M}\s.,!?:;"'’\-(){}[\]<>«»„“”、。？！・…〜ー]+$/u) // isAlpha check for ALL alphabets
         .withMessage("Example must only contain letters, numbers, spaces, and common punctuation")
 ];
 

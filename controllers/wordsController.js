@@ -30,9 +30,11 @@ const getWords = asyncHandler( async(req, res) => {
     if (category.userId !== req.userId) {
         return res.status(403).status({ error: "Unauthroized. You don't have access to that"});
     }
+
     // Access words from that category from the db
     const words = await prisma.word.findMany({
         where: { 
+            languageId: req.pairId,
             userId: req.userId,
             categories: {
                 some: {
