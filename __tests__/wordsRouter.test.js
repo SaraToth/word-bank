@@ -9,7 +9,7 @@ jest.mock("../middleware/verifyToken", () => {
         next();
     }
 });
-
+const languagesRouter = require("../routes/languagesRouter");
 const categoriesRouter = require("../routes/categoriesRouter");
 const wordsRouter = require("../routes/wordsRouter");
 const request = require("supertest");
@@ -27,13 +27,15 @@ testApp.use(express.json());
 testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
-testApp.use("/categories/:categoryId/words", wordsRouter);
+testApp.use("/languages", languagesRouter);
+testApp.use("/languages/:pairId/categories", categoriesRouter)
+testApp.use("/languages/:pairId/categories/:categoryId/words", wordsRouter);
 
 describe("GET words", () => {
 
     it("Gets words", async() => {
         const response = await request(testApp)
-            .get("/categories/1/words")
+            .get("/languages/1/categories/1/words")
             .expect("Content-type", /json/)
             .expect(200);
         
@@ -47,7 +49,7 @@ describe("GET words", () => {
 
     it("Fails if category doesn't exist", async() => {
         const response = await request(testApp)
-            .get("/categories/10000/words")
+            .get("/languages/1/categories/10000/words")
             .expect("Content-type", /json/)
             .expect(404);
     
