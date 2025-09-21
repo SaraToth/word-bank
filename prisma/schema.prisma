@@ -78,7 +78,6 @@ model Word {
   @@map("words")
 }
 
-
 enum Grade {
   FORGOT
   HARD
