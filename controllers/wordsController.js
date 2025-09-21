@@ -5,12 +5,6 @@ const slugifyText = require("../utils/slugifyText");
 
 const getWords = asyncHandler( async(req, res) => {
     
-    // Access current user id from json web token
-    const userId = parseInt(req.user.id);
-    if (!userId) {
-        return res.status(401).json({ error: "You must be logged in to access that." });
-    }
-
     // Access categoryId from the path
     const categoryId = parseInt(req.params.categoryId);
     
@@ -29,21 +23,23 @@ const getWords = asyncHandler( async(req, res) => {
         return res.status(404).json({ error: "Category doesn't exist"});
     }
 
+    console.log("user is", req.userId);
+
     // Confirm user has access
-    if (category.userId !== userId) {
+    if (category.userId !== req.userId) {
         return res.status(403).status({ error: "Unauthroized. You don't have access to that"});
     }
     // Access words from that category from the db
     const words = await prisma.word.findMany({
         where: { 
-            userId: userId,
+            userId: req.userId,
             categories: {
                 some: {
                     id: categoryId
                 }
             }
         },
-        select: { id: true, kr: true, en: true, example: true}
+        select: { id: true, l1Word: true, l2Word: true, example: true}
     });
 
     return res.status(200).json({ 
