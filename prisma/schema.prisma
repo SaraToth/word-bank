@@ -13,18 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum CategoryType {
-  DEFAULT
-  CUSTOM
-}
-
-enum Grade {
-  FORGOT
-  HARD
-  OKAY
-  EASY
-}
-
 model User {
   id  Int @id @default(autoincrement())
   firstName String @map("first_name")
@@ -37,13 +25,28 @@ model User {
   @@map("users")
 }
 
+enum LanguageCode { 
+  KR // Korean
+  EN // English
+  FR // France
+  HU // Hungarian
+  ES // Spanish
+  JA // Japanese
+  ZH // Chinese
+}
+
 model Language {
   id Int @id @default(autoincrement())
-  l1 String @map("lang_one") // L1 is the native language
-  l2 String @map("lang_two")  // L2 is the foreign language
+  l1 LanguageCode // L1 is the native language
+  l2 LanguageCode  // L2 is the foreign language
   categories Category[]
   words Word[]
   @@map("languages")
+}
+
+enum CategoryType {
+  DEFAULT
+  CUSTOM
 }
 
 model Category {
@@ -74,6 +77,13 @@ model Word {
   @@map("words")
 }
 
+
+enum Grade {
+  FORGOT
+  HARD
+  OKAY
+  EASY
+}
 
 // Optional terms, are blank at creating but updated after user encounters words in flashcard review
 model ReviewProcess {
