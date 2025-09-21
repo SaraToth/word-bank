@@ -18,7 +18,9 @@ const slugifyText = require("../utils/slugifyText");
  * @param {Request} req 
  * @param {Response} res
  * @returns {Promise<Response>} JSON response:
+ *  - 400: { error: String } - if pairId is not passed in path
  *  - 401 { error: String} - if user's id (from jwt) does not exist
+ *  - 404: { error: String } - if the lang pair is not in the db
  *  - 200 { message: String, categories: Object } - request succeeds
  * @throws {Error} if database lookup fails
  */
@@ -30,9 +32,24 @@ const getCategories = asyncHandler(async(req, res) => {
         return res.status(401).json({ error: "You must be logged in to access that." });
     }
 
+    // Gets the language pair from path
+    const pairId = parseInt(req.params.pairId);
+    if (!pairId) {
+        return res.status(400).json({ error: "language pair not selected"});
+    }
+
+    // Check pairId exists
+    const langPair = await prisma.language.findUnique({
+        where: { id: pairId}
+    });
+
+    if (langPair === null) {
+        return res.status(404).json({ message: "Language pair does not exist"});
+    }
+
     // Get the list of categories from the database
     const categories = await prisma.category.findMany({
-        where: { userId: userId },
+        where: { userId: userId, languageId: langPair.id },
         select: { id: true, slug: true, name: true }
     });
 
