@@ -9,7 +9,9 @@
     "test:lang": "NODE_ENV=test jest __tests__/languagesRouter.test.js",
     "test:auth": "NODE_ENV=test jest __tests__/authRouter.test.js",
     "test:cat": "NODE_ENV=test jest __tests__/categoriesRouter.test.js",
-    "test:word": "NODE_ENV=test jest __tests__/wordsRouter.test.js"
+    "test:word": "NODE_ENV=test jest __tests__/wordsRouter.test.js",
+    "db:reset": "prisma migrate reset",
+    "db:reset:test": "cross-env NODE_ENV=test prisma migrate reset"
   },
   "prisma": {
     "seed": "node prisma/seed.js",
