@@ -40,7 +40,7 @@ describe("GET words", () => {
 
     it("Gets words", async() => {
         const response = await request(testApp)
-            .get("/languages/1/categories/1/words")
+            .get("/languages/en-kr/categories/1/words")
             .expect("Content-type", /json/)
             .expect(200);
         
@@ -54,27 +54,19 @@ describe("GET words", () => {
 
     it("Fails if category doesn't exist", async() => {
         const response = await request(testApp)
-            .get("/languages/1/categories/10000/words")
+            .get("/languages/en-kr/categories/10000/words")
             .expect("Content-type", /json/)
             .expect(404);
     
         expect(response.body).toHaveProperty("error");
     })
 
-    // it("Fails if user doesn't have access", async() => {
-    //     const response = await request(testApp)
-    //         .get("/categories/3/words") // Ron tries to get Hermione's
-    //         .expect("Content-type", /json/)
-    //         .expect(403);
-
-    //     expect(response.body).toHaveProperty("error");
-    // })
 }) 
 
 describe("POST add word", () => {
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .post("/languages/1/categories/1/words")
+            .post("/languages/en-kr/categories/1/words")
             .send({
                 l1Word: "안녕하세요",
                 l2Word: "", // Required data missing
@@ -89,7 +81,7 @@ describe("POST add word", () => {
 
     it("Succesfully creates a new word", async() => {
         const response = await request(testApp)
-            .post("/languages/1/categories/1/words")
+            .post("/languages/en-kr/categories/1/words")
             .send({
                 l1Word: "hello",
                 l2Word: "안녕하세요",
@@ -118,7 +110,7 @@ describe("POST add word", () => {
 
     it("Succesfully creates a new word with no example", async() => {
         const response = await request(testApp)
-            .post("/languages/1/categories/1/words")
+            .post("/languages/en-kr/categories/1/words")
             .send({
                 l1Word: "fruit",
                 l2Word: "과일",
