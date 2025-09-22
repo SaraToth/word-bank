@@ -102,3 +102,27 @@ npm run test
 ```
 
 to launch the test suite.
+
+## API Routes
+
+### Authorization
+- POST /user/signup
+- POST /user/login
+
+### Protected Routes:
+
+#### Languages
+- POST /languages - creates a new language pair (i.e. EN->KR) for a logged in user
+
+#### Categories
+- GET /languages/:languagesSlug/categories
+- GET /languages/:languagesSlug/categories/:categoryId
+- POST /languages/:languagesSlug/categories
+- PATCH /languages/:languagesSlug/categories/:categoryId
+- DELETE /languages/:languagesSlug/categories/:categoryId
+#### Words
+- GET /languages/:languagesSlug/categories/:categoryId/words
+- POST /languages/:languagesSlug/categories/:categoryId/words
+
+#### Review
+
