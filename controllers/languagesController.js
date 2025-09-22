@@ -4,6 +4,7 @@ const validateLang = require("../utils/validateLang");
 const { validationResult } = require("express-validator");
 const toProperNoun = require("../utils/toProperNoun");
 const slugifyText = require("../utils/slugifyText");
+const { get } = require("../routes/wordsRouter");
 
 // Type definitions
 /**
@@ -76,4 +77,19 @@ const setUpLanguage = [
     })
 ];
 
-module.exports = { setUpLanguage };
+const getLanguageCodes = asyncHandler( async(req, res) => {
+    
+    const pairs = await prisma.language.findMany({
+        select: { l1: true, l2: true }
+    });
+    
+    // Sanitize from { l1: "EN", l2: "KR" } TO: "EN-KR"
+    const sanitized = pairs.map(p => `${p.l1}-${p.l2}`);
+
+    return res.status(200).json({ 
+        message: "Sucessfully fetched available language codes",
+        codes: sanitized
+    });
+});
+
+module.exports = { setUpLanguage, getLanguageCodes };
