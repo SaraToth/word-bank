@@ -77,11 +77,25 @@ const setUpLanguage = [
     })
 ];
 
+/**
+ * Gets all the available language pairs in their code form ex) "EN-KR"
+ * 
+ * @param {Request} req
+ * @param {Response} res
+ * @return {Promsie<Response>} JSON Response:
+ *  - 404 { error: String } - if no language pairs exist
+ *  - 200 { message: String, codes: codes[] } - Returns an array of the sanitized language codes ex) "EN-KR"
+ */
 const getLanguageCodes = asyncHandler( async(req, res) => {
     
     const pairs = await prisma.language.findMany({
         select: { l1: true, l2: true }
     });
+
+    // Confirm pairs exist
+    if (!pairs) {
+        return res.status(404).json({ error: "No language pairs are available yet"});
+    };
     
     // Sanitize from { l1: "EN", l2: "KR" } TO: "EN-KR"
     const sanitized = pairs.map(p => `${p.l1}-${p.l2}`);

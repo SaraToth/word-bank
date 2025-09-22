@@ -111,10 +111,21 @@ to launch the test suite.
 
 ### Protected Routes:
 
+The following routes are protected via a json web token (bearer token) issued upon login. The following routes depend on that passed user's id.
+
 #### Languages
+- GET /languages - gets all currently available language codes (Example: "EN-KR")
 - POST /languages - creates a new language pair (i.e. EN->KR) for a logged in user
 
 #### Categories
+**languagesSlug** refers to l1-l2 language codes. Valid options are:
+- en-kr
+- en-fr
+- en-es
+- en-hu
+- en-ja
+
+**routes**
 - GET /languages/:languagesSlug/categories
 - GET /languages/:languagesSlug/categories/:categoryId
 - POST /languages/:languagesSlug/categories
