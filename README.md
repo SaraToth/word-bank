@@ -1,6 +1,8 @@
 # word-bank
 A web service to learn new words in Korean and store them in your own virtual notebook system for fast vocabulary acquisition.
 
+For full documentation visit [Wordbank API Documentation](https://brash-wedelia-03c.notion.site/Wordbank-API-Documentation-276678859f1f80fba484ecd2465256ac)
+
 ## Setting Up
 
 Fork a copy of this repository and install dependencies:
@@ -136,4 +138,3 @@ The following routes are protected via a json web token (bearer token) issued up
 - POST /languages/:languagesSlug/categories/:categoryId/words
 
 #### Review
-

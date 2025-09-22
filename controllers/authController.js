@@ -123,6 +123,8 @@ const postLogin = [
             { expiresIn: "1hr" }
         );
 
+        console.log("token:", token)
+
         return res.status(200).json({token});
 
     }),
