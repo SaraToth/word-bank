@@ -102,3 +102,19 @@ describe("POST setup language", () => {
         });
     });
 });
+
+describe("GET languageCoes", () => {
+    it("Fetches available language codes", async() => {
+        const response = await request(testApp)
+            .get("/languages")
+            .expect("Content-type", /json/)
+            .expect(200);
+
+        // Expected response properties
+        expect(response.body).toHaveProperty("message");
+        expect(response.body).toHaveProperty("codes");
+
+        // Expected codes structure:
+        expect(Array.isArray(response.body.codes)).toBe(true);
+    })
+})
