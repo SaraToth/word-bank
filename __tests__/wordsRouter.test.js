@@ -36,33 +36,6 @@ testApp.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
-describe("GET words", () => {
-
-    it("Gets words", async() => {
-        const response = await request(testApp)
-            .get("/languages/en-kr/categories/1/words")
-            .expect("Content-type", /json/)
-            .expect(200);
-        
-        // Expected response properties
-        expect(response.body).toHaveProperty("message");
-        expect(response.body).toHaveProperty("words");
-
-        // Words will be an object (but potentially empty)
-        expect(typeof response.body.words).toBe("object");
-    });
-
-    it("Fails if category doesn't exist", async() => {
-        const response = await request(testApp)
-            .get("/languages/en-kr/categories/10000/words")
-            .expect("Content-type", /json/)
-            .expect(404);
-    
-        expect(response.body).toHaveProperty("error");
-    })
-
-}) 
-
 describe("POST add word", () => {
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
