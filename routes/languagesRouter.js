@@ -16,6 +16,5 @@ languagesRouter.use("/:languagesSlug/categories", processLangPair, categoriesRou
 languagesRouter.use("/:languagesSlug/words", wordsRouter);
 
 languagesRouter.get("/", getLanguageCodes)
-languagesRouter.post("/", setUpLanguage);
 
 module.exports = languagesRouter;
