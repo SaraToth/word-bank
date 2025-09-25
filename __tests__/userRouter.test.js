@@ -231,6 +231,20 @@ describe("POST setup language", () => {
     });
 });
 
+describe("GET user languages", () => {
+    it("Successfully returns a list of languageIds", async() => {
+        const response = await request(testApp)
+            .get("/user/languages")
+            .expect("Content-type", /json/)
+            .expect(200);
+        
+        expect(response.body).toHaveProperty("message");
+        expect(response.body).toHaveProperty("languageIds");
+        
+        expect(Array.isArray(response.body.languageIds)).toBe(true);
+    })
+})
+
 afterAll(async () => {
   await prisma.$disconnect();
 });
