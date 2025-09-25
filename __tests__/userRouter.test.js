@@ -156,7 +156,7 @@ describe("POST login", () => {
     })
 })
 
-describe("POST setup language", () => {
+describe("POST user language", () => {
     it("Fails when validation data is missing", async() => {
         const response = await request(testApp)
             .post("/user/languages")

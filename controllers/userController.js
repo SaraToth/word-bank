@@ -141,7 +141,7 @@ const postLogin = [
  *  - 404 { error: String } - provided lang pair does not exist in db
  * - 200 { message: String, category: Object } - newly created default category
  */
-const setUpLanguage = [
+const postUserLanguage = [
     validateLang,
 
     asyncHandler( async(req, res) => {
@@ -188,7 +188,7 @@ const setUpLanguage = [
         });
 
         return res.status(200).json({ 
-            message: `New ${langOne} to ${langTwo} succesfully setup`,
+            message: `New ${langOne} to ${langTwo} succesfully added`,
             category: category
         });
     })
@@ -220,4 +220,4 @@ const getUserLangs = asyncHandler( async(req, res) => {
         languageIds: languageIds});
 });
 
-module.exports = { postSignup, postLogin, setUpLanguage, getUserLangs };
+module.exports = { postSignup, postLogin, postUserLanguage, getUserLangs };

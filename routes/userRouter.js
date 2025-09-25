@@ -3,7 +3,7 @@ const userRouter = Router();
 const verifyToken = require("../middleware/verifyToken");
 const confirmLogin = require("../middleware/confirmLogin");
 const processLangPair = require("../middleware/processLangPair");
-const { postSignup, postLogin, setUpLanguage, getUserLangs } = require("../controllers/userController");
+const { postSignup, postLogin, postUserLanguage, getUserLangs } = require("../controllers/userController");
 const categoriesRouter = require("./categoriesRouter");
 const wordsRouter = require("./wordsRouter");
 
@@ -20,7 +20,7 @@ userRouter.use("/languages/:languagesSlug/categories", processLangPair, categori
 userRouter.use("/languages/:languagesSlug/words", processLangPair, wordsRouter);
 
 // Protected Routes
-userRouter.post("/languages", setUpLanguage);
+userRouter.post("/languages", postUserLanguage);
 userRouter.get("/languages", getUserLangs);
 
 
