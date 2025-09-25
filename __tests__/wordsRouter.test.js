@@ -10,11 +10,11 @@ jest.mock("../middleware/verifyToken", () => {
     }
 });
 const languagesRouter = require("../routes/languagesRouter");
+const authRouter = require("../routes/authRouter");
 const categoriesRouter = require("../routes/categoriesRouter");
 const wordsRouter = require("../routes/wordsRouter");
 const request = require("supertest");
 const express = require("express");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const prisma = require("../prisma/client");
 
@@ -27,9 +27,9 @@ testApp.use(express.json());
 testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
-testApp.use("/languages", languagesRouter);
-testApp.use("/languages/:pairId/categories", categoriesRouter)
-testApp.use("/languages/:pairId/categories/:categoryId/words", wordsRouter);
+testApp.use("/user", authRouter);
+testApp.use("/user/languages/:pairId/categories", categoriesRouter)
+testApp.use("/user/languages/:pairId/categories/:categoryId/words", wordsRouter);
 
 testApp.use((err, req, res, next) => {
   console.error(err);
@@ -39,7 +39,7 @@ testApp.use((err, req, res, next) => {
 describe("POST add word", () => {
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .post("/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/categories/1/words")
             .send({
                 l1Word: "안녕하세요",
                 l2Word: "", // Required data missing
@@ -54,7 +54,7 @@ describe("POST add word", () => {
 
     it("Succesfully creates a new word", async() => {
         const response = await request(testApp)
-            .post("/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/categories/1/words")
             .send({
                 l1Word: "hello",
                 l2Word: "안녕하세요",
@@ -83,7 +83,7 @@ describe("POST add word", () => {
 
     it("Succesfully creates a new word with no example", async() => {
         const response = await request(testApp)
-            .post("/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/categories/1/words")
             .send({
                 l1Word: "fruit",
                 l2Word: "과일",

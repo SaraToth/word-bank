@@ -11,10 +11,9 @@ jest.mock("../middleware/verifyToken", () => {
 });
 
 const categoriesRouter = require("../routes/categoriesRouter");
-const languagesRouter = require("../routes/languagesRouter");
+const authRouter = require("../routes/authRouter");
 const request = require("supertest");
 const express = require("express");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const prisma = require("../prisma/client");
 
@@ -28,14 +27,14 @@ testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
 
-testApp.use("/languages", languagesRouter);
-testApp.use("/languages/:languagesSlug/categories", categoriesRouter);
+testApp.use("/user", authRouter);
+testApp.use("/user/languages/:languagesSlug/categories", categoriesRouter);
 
 
 describe("GET categories", () => {
     it("Gets the categories for current user", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories")
+            .get("/user/languages/en-kr/categories")
             .expect("Content-Type", /json/)
             .expect(200);
         
@@ -55,26 +54,25 @@ describe("GET categories", () => {
 describe("GET single category", () => {
     it("Gets a single category per the current user's request", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories/1") // Get Ron Weasley's default category
+            .get("/user/languages/en-kr/categories/1") // Get Ron Weasley's default category
             .expect("Content-Type", /json/)
             .expect(200);
         
-            console.log(response.body);
-        // // Expected response properties:
-        // expect(response.body).toHaveProperty("message");
-        // expect(response.body).toHaveProperty("category");
+        // Expected response properties:
+        expect(response.body).toHaveProperty("message");
+        expect(response.body).toHaveProperty("category");
 
-        // // Expected structure for category:
-        // expect(response.body.category).toMatchObject({
-        //     id: expect.any(Number),
-        //     name: expect.any(String),
-        //     slug: expect.any(String)
-        // });
+        // Expected structure for category:
+        expect(response.body.category).toMatchObject({
+            id: expect.any(Number),
+            name: expect.any(String),
+            slug: expect.any(String)
+        });
     });
 
     it("Fails when provided categoryId is not a number", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories/abc")
+            .get("/user/languages/en-kr/categories/abc")
             .expect("Content-Type", /json/)
             .expect(400);
 
@@ -84,7 +82,7 @@ describe("GET single category", () => {
 
     it("Fails when user requests a category they don't own", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories/3") // Ron is requesting Hermione's category
+            .get("/user/languages/en-kr/categories/3") // Ron is requesting Hermione's category
             .expect("Content-Type", /json/)
             .expect(403);
         
@@ -93,7 +91,7 @@ describe("GET single category", () => {
 
     it("Fails when user requests a category that doesn't exist", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories/100") // Does not exist
+            .get("/user/languages/en-kr/categories/100") // Does not exist
             .expect("Content-Type", /json/)
             .expect(404);
         
@@ -102,7 +100,7 @@ describe("GET single category", () => {
 
     it("Fails when category id is not associated with the pairId", async() => {
         const response = await request(testApp)
-            .get("/languages/en-fr/categories/1")
+            .get("/user/languages/en-fr/categories/1")
             .expect("Content-type", /json/)
             .expect(400);
 
@@ -113,7 +111,7 @@ describe("GET single category", () => {
 describe("Post a new category", () => {
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .post("/languages/en-kr/categories")
+            .post("/user/languages/en-kr/categories")
             .send({
                 category: ""
             })
@@ -126,7 +124,7 @@ describe("Post a new category", () => {
 
     it("Returns the newly created category if it succeeds", async() => {
         const response = await request(testApp)
-            .post("/languages/en-kr/categories")
+            .post("/user/languages/en-kr/categories")
             .send({ 
                 category: "My new folder"
             })
@@ -160,7 +158,7 @@ describe("Patch an existing category", () => {
 
     beforeEach( async() => {
         const response = await request(testApp)
-            .post("/languages/en-kr/categories")
+            .post("/user/languages/en-kr/categories")
             .send({category: "My test category"})
             .expect("Content-type", /json/)
             .expect(200);
@@ -181,7 +179,7 @@ describe("Patch an existing category", () => {
 
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .patch(`/languages/en-kr/categories/${myCategory.id}`)
+            .patch(`/user/languages/en-kr/categories/${myCategory.id}`)
             .send({
                 category: ""
             })
@@ -195,7 +193,7 @@ describe("Patch an existing category", () => {
 
     it("Fails if language pair is not a match", async() => {
         const response = await request(testApp)
-            .patch(`/languages/en-fr/categories/${myCategory.id}`)
+            .patch(`/user/languages/en-fr/categories/${myCategory.id}`)
             .send({
                 category: "Patch wins"
             })
@@ -207,7 +205,7 @@ describe("Patch an existing category", () => {
 
     it("Fails if category type is DEFAULT", async() => {
         const response = await request(testApp)
-            .patch("/languages/en-kr/categories/1") // Ron's default category
+            .patch("/user/languages/en-kr/categories/1") // Ron's default category
             .send({
                 category: "tra la"
             })
@@ -219,7 +217,7 @@ describe("Patch an existing category", () => {
 
     it("successfully renames category", async() => {
         const response = await request(testApp)
-            .patch(`/languages/en-kr/categories/${myCategory.id}`)
+            .patch(`/user/languages/en-kr/categories/${myCategory.id}`)
             .send({
                 category: "Patch wins"
             })
@@ -246,7 +244,7 @@ describe("Patch an existing category", () => {
 describe("Delete an existing category", () => {
     it("Fails if the category doesn't exist", async() => {
         const response = await request(testApp)
-            .delete(`/languages/en-kr/categories/10000`)
+            .delete(`/user/languages/en-kr/categories/10000`)
             .expect("Content-type", /json/) 
             .expect(404);
 
@@ -255,7 +253,7 @@ describe("Delete an existing category", () => {
 
     it("Fails user doesn't have access", async() => {
         const response = await request(testApp)
-            .delete("/languages/en-kr/categories/3") // Ron tries to delete Hermione's
+            .delete("/user/languages/en-kr/categories/3") // Ron tries to delete Hermione's
             .expect("Content-type", /json/) 
             .expect(403);
         
@@ -264,7 +262,7 @@ describe("Delete an existing category", () => {
 
     it("Fails if the category is a DEFAULT type", async() => {
         const response = await request(testApp)
-            .delete("/languages/en-kr/categories/1") // Ron's default category
+            .delete("/user/languages/en-kr/categories/1") // Ron's default category
             .expect("Content-type", /json/)
             .expect(403);
 
@@ -274,7 +272,7 @@ describe("Delete an existing category", () => {
     it("Succeeds when delete request is valid", async() => {
         // Create a category to delete
         const response = await request(testApp)
-            .post("/languages/en-kr/categories")
+            .post("/user/languages/en-kr/categories")
             .send({
                 category: "This is for deleting"
             })
@@ -300,7 +298,7 @@ describe("GET words", () => {
 
     it("Gets words", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories/1/words")
+            .get("/user/languages/en-kr/categories/1/words")
             .expect("Content-type", /json/)
             .expect(200);
         
@@ -314,7 +312,7 @@ describe("GET words", () => {
 
     it("Fails if category doesn't exist", async() => {
         const response = await request(testApp)
-            .get("/languages/en-kr/categories/10000/words")
+            .get("/user/languages/en-kr/categories/10000/words")
             .expect("Content-type", /json/)
             .expect(404);
     
