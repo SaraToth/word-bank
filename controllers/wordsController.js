@@ -49,7 +49,7 @@ const addWord = [
                 languageId: req.pairId,
                 l1Word: word.l1Word,
                 l2Word: word.l2Word,
-                example: word.example? word.example : null,
+                example: word.example || null,
                 categories: {
                     connect: categoryIds.map(id => ({ id }))
                 }
@@ -66,26 +66,11 @@ const addWord = [
 
 const bulkAddWords = asyncHandler( async(req, res) => {
 
-    // Find defaultCategory
-    const defaultCategory = await prisma.category.findFirst({
-        where: { 
-            userId: req.userId,
-            languageId: req.pairId,
-            type: "DEFAULT"
-        }
-    });
-
     // Access the words from form
     const { words } = req.body;
 
     for (const word of words) {
-        const { l1Word, l2Word, example, categories } = word;
-
-        // cateogryIds must be an array when empty
-        const categoryIds = categories ? [...word.categories] : [];
-
-        // Add default category id
-        categoryIds.push(defaultCategory.id);
+        const { l1Word, l2Word, example, categories, categoryIds } = word;
 
         // Check for duplicate
         const existing = await prisma.word.findFirst({
@@ -93,9 +78,33 @@ const bulkAddWords = asyncHandler( async(req, res) => {
                 l2Word: l2Word, 
                 userId: req.userId,
                 languageId: req.pairId,
+            },
+            include: {
+                categories: true // fetch existing categories
             }
         });
-        if(existing) continue // skip duplicates
+
+        if(existing) {
+            // Get the categoryIds the word belongs to
+            const existingCategoryIds = existing.categories.map(category => category.id);
+            // Filter the categorys user wants to add word to
+            const missingCategoryIds = word.categoryIds.filter(
+                id => !existingCategoryIds.includes(id)
+            );
+
+            // If there are categories that don't have the word add it:
+            if (missingCategoryIds.length > 0) {
+                await prisma.word.update({
+                    where: { id: existing.id},
+                    data: {
+                        categories: {
+                            connect: missingCategoryIds.map(id => ({ id }))
+                        }
+                    }
+                });
+            }
+            continue // skip creating a new word
+        }
 
         await prisma.word.create({
             data: {
@@ -103,13 +112,13 @@ const bulkAddWords = asyncHandler( async(req, res) => {
                 languageId: req.pairId,
                 l1Word,
                 l2Word,
-                example: example || null,
+                example: word.example || null,
                 categories: {
-                    connect: categoryIds.map(id => ({ id }))
+                    connect: word.categoryIds.map(id => ({ id }))
                 }
             }
         });
-    };
+    }
 
     return res.status(200).json({
         message: "Bulk added words succesfully"
