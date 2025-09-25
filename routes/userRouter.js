@@ -7,7 +7,7 @@ const { postSignup, postLogin, postUserLanguage, getUserLangs } = require("../co
 const categoriesRouter = require("./categoriesRouter");
 const wordsRouter = require("./wordsRouter");
 
-// Signup/Login outes
+// Signup/Login routes
 userRouter.post("/signup", postSignup);
 userRouter.post("/login", postLogin);
 
