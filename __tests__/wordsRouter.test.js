@@ -41,12 +41,17 @@ describe("POST add word", () => {
         const response = await request(testApp)
             .post("/user/languages/en-kr/categories/1/words")
             .send({
-                l1Word: "안녕하세요",
-                l2Word: "", // Required data missing
-                example: ""
+                words: [{
+                    l1Word: "안녕하세요",
+                    l2Word: "", // Required data missing
+                    example: "",
+                    categories: []
+                }]
             })
             .expect("Content-type", /json/) 
-            .expect(400)
+            .expect(400);
+
+            console.log("response", response.body)
 
         expect(response.body).toHaveProperty("errors")
         expect(Array.isArray(response.body.errors)).toBe(true);
@@ -56,9 +61,12 @@ describe("POST add word", () => {
         const response = await request(testApp)
             .post("/user/languages/en-kr/categories/1/words")
             .send({
-                l1Word: "hello",
-                l2Word: "안녕하세요",
-                example: "안녕하세요, 저는 세라입니다."
+                words: [{
+                    l1Word: "hello",
+                    l2Word: "안녕하세요",
+                    example: "안녕하세요, 저는 세라입니다.",
+                    categories: []
+                }]
             })
             .expect("Content-type", /json/)
             .expect(200);
@@ -85,9 +93,12 @@ describe("POST add word", () => {
         const response = await request(testApp)
             .post("/user/languages/en-kr/categories/1/words")
             .send({
-                l1Word: "fruit",
-                l2Word: "과일",
-                example: "" // Empty should be allowed
+                words: [{
+                    l1Word: "fruit",
+                    l2Word: "과일",
+                    example: "", // Empty should be allowed
+                    categories: []
+                }]
             })
             .expect("Content-type", /json/)
             .expect(200);
