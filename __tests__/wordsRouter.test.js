@@ -9,8 +9,8 @@ jest.mock("../middleware/verifyToken", () => {
         next();
     }
 });
-const languagesRouter = require("../routes/languagesRouter");
-const authRouter = require("../routes/authRouter");
+
+const userRouter = require("../routes/userRouter");
 const categoriesRouter = require("../routes/categoriesRouter");
 const wordsRouter = require("../routes/wordsRouter");
 const request = require("supertest");
@@ -27,7 +27,7 @@ testApp.use(express.json());
 testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
-testApp.use("/user", authRouter);
+testApp.use("/user", userRouter);
 testApp.use("/user/languages/:pairId/categories", categoriesRouter)
 testApp.use("/user/languages/:pairId/categories/:categoryId/words", wordsRouter);
 

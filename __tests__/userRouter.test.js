@@ -1,5 +1,5 @@
 /**
- * Test file for authRouter.js and the corresponding authController.js
+ * Test file for userRouter.js and the corresponding userController.js
  */
 
 // Mock verifyToken passing
@@ -10,7 +10,7 @@ jest.mock("../middleware/verifyToken", () => {
     }
 });
 
-const authRouter = require("../routes/authRouter");
+const userRouter = require("../routes/userRouter");
 const request = require("supertest");
 const express = require("express");
 const jwt = require("jsonwebtoken");
@@ -25,7 +25,7 @@ testApp.use(express.json());
 testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
-testApp.use("/user", authRouter);
+testApp.use("/user", userRouter);
 
 // User to test signup
 const userNick = {

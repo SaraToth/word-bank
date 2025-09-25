@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 // Routers
-const authRouter = require("./routes/authRouter");
+const userRouter = require("./routes/userRouter");
 // const categoriesRouter = require("./routes/categoriesRouter");
 const languagesRouter = require("./routes/languagesRouter");
 
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/languages", languagesRouter);
 // app.use("/categories", categoriesRouter);
-app.use("/user", authRouter);
+app.use("/user", userRouter);
 
 // 404 Handler
 app.use((req, res) => {
