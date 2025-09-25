@@ -194,4 +194,30 @@ const setUpLanguage = [
     })
 ];
 
-module.exports = { postSignup, postLogin, setUpLanguage };
+const getUserLangs = asyncHandler( async(req, res) => {
+
+    // Default folders exist for each of user's languages
+    const langPairs = await prisma.category.findMany({
+        where: {
+            userId: req.userId,
+            type: "DEFAULT",
+        },
+        select: {
+            languageId: true
+        }
+    });
+
+    // Check there are language pairs
+    if (langPairs.length === 0) {
+        return res.status(404).json({ error: "No language pairs exist for that user"});
+    };
+
+    // Filter only the languageIds
+    const languageIds = langPairs.map(pair => pair.languageId);
+
+    return res.status(200).json({ 
+        message: "Successfully retrieved user's languageIds",
+        languageIds: languageIds});
+});
+
+module.exports = { postSignup, postLogin, setUpLanguage, getUserLangs };
