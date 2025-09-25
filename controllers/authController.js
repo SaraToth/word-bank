@@ -4,8 +4,6 @@ const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const validateLang = require("../utils/validateLang");
-const { validationResult } = require("express-validator");
-const toProperNoun = require("../utils/toProperNoun");
 const slugifyText = require("../utils/slugifyText");
 
 // Type definitions
@@ -127,8 +125,6 @@ const postLogin = [
             { expiresIn: "1hr" }
         );
 
-        console.log("token:", token)
-
         return res.status(200).json({token});
 
     }),
@@ -176,7 +172,7 @@ const setUpLanguage = [
         // Default category name and slug:
         const defaultName = "My Words";
         const slug = slugifyText(defaultName);
-
+        
         // Creates the default category for that user
         const category = await prisma.category.create({
             data: {
