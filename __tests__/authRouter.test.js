@@ -1,6 +1,15 @@
 /**
  * Test file for authRouter.js and the corresponding authController.js
  */
+
+// Mock verifyToken passing
+jest.mock("../middleware/verifyToken", () => {
+    return (req, res, next) => {
+        req.user = { id: 1 }; // Ron Weasley
+        next();
+    }
+});
+
 const authRouter = require("../routes/authRouter");
 const request = require("supertest");
 const express = require("express");
@@ -150,7 +159,7 @@ describe("POST login", () => {
 describe("POST setup language", () => {
     it("Fails when validation data is missing", async() => {
         const response = await request(testApp)
-            .post("/languages")
+            .post("/user/languages")
             .send({
                 langOne: "",
                 langTwo: ""
@@ -165,7 +174,7 @@ describe("POST setup language", () => {
 
     it("Fails when user chooses same language", async() => {
         const response = await request(testApp)
-            .post("/languages")
+            .post("/user/languages")
             .send({
                 langOne: "EN",
                 langTwo: "EN"
@@ -180,7 +189,7 @@ describe("POST setup language", () => {
 
     it("Fails when language pair isn't yet offered in db", async() => {
         const response = await request(testApp)
-            .post("/languages")
+            .post("/user/languages")
             .send({
                 langOne: "FR",
                 langTwo: "EN"
@@ -193,7 +202,7 @@ describe("POST setup language", () => {
 
     it("Succeeds", async() => {
         const response = await request(testApp)
-            .post("/languages")
+            .post("/user/languages")
             .send({
                 langOne: "EN",
                 langTwo: "FR"
