@@ -10,6 +10,22 @@ jest.mock("../middleware/verifyToken", () => {
     }
 });
 
+const bulkWords = [
+    {
+        l1Word: "hello",
+        l2Word: "안녕하세요",
+        example: "",
+        categories: []
+    },
+
+    {
+        l1Word: "fruit",
+        l2Word: "과일",
+        example: "",
+        categories: []
+    }
+];
+
 const userRouter = require("../routes/userRouter");
 const categoriesRouter = require("../routes/categoriesRouter");
 const wordsRouter = require("../routes/wordsRouter");
@@ -121,6 +137,52 @@ describe("POST add word", () => {
         });
     })
 })
+
+describe("POST bulk add words", () => {
+    it("Succesfully adds words", async() => {
+        const response = await request(testApp)
+            .post("/user/languages/en-kr/words/bulk")
+            .send({
+                words: bulkWords
+            })
+            .expect("Content-type", /json/)
+            .expect(200);
+
+        expect(response.body).toHaveProperty("message");
+        
+        const l2Words = bulkWords.map(w => w.l2Word);
+
+        await prisma.word.deleteMany({
+            where: {
+                l2Word: { in: l2Words },
+                userId: 1,
+            }
+        });
+    })
+
+    it("Fails if validation fails", async() => {
+        const response = await request(testApp)
+            .post("/user/languages/en-kr/words/bulk")
+            .send({
+                words: [
+                    {
+                        l1Word: "hello",
+                        l2Word: "",
+                        example: "",
+                        categories: []
+                    }
+                ]
+            })
+            .expect("Content-type", /json/)
+            .expect(400);
+        
+        expect(response.body).toHaveProperty("errors");
+        expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+})
+
+
+
 afterAll(async () => {
   await prisma.$disconnect();
 });
