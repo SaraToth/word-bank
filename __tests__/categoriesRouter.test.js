@@ -10,9 +10,11 @@ jest.mock("../middleware/verifyToken", () => {
     }
 });
 
+// Routes needed for mocking
 const categoriesRouter = require("../routes/categoriesRouter");
 const wordsRouter = require("../routes/wordsRouter");
 const userRouter = require("../routes/userRouter");
+
 const request = require("supertest");
 const express = require("express");
 require("dotenv").config();
@@ -27,7 +29,6 @@ testApp.use(express.json());
 testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
-
 testApp.use("/user", userRouter);
 testApp.use("/user/languages/:languagesSlug/categories", categoriesRouter);
 testApp.use("/user/languages/:languagesSlug/words", wordsRouter);
@@ -282,7 +283,7 @@ describe("Delete an existing category", () => {
             .expect(200);
         
         expect(response.body.category.name).toBe("Cookie");
-        
+
         // Get category id
         const id = response.body.category.id;
 
