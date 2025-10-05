@@ -11,6 +11,7 @@ jest.mock("../middleware/verifyToken", () => {
 });
 
 const categoriesRouter = require("../routes/categoriesRouter");
+const wordsRouter = require("../routes/wordsRouter");
 const userRouter = require("../routes/userRouter");
 const request = require("supertest");
 const express = require("express");
@@ -29,6 +30,7 @@ testApp.use(express.urlencoded({ extended: true}));
 
 testApp.use("/user", userRouter);
 testApp.use("/user/languages/:languagesSlug/categories", categoriesRouter);
+testApp.use("/user/languages/:languagesSlug/words", wordsRouter);
 
 
 describe("GET categories", () => {
@@ -291,6 +293,65 @@ describe("Delete an existing category", () => {
         });
 
         expect(check).toBe(null);
+    })
+
+    it("Succeeds and retains existing words", async() => {
+        // Create a category to delete
+        await request(testApp)
+            .post("/user/languages/en-kr/categories")
+            .send({
+                category: "nature"
+            })
+            .expect("Content-type", /json/)
+            .expect(200);
+
+        // Access that category
+        const category = await prisma.category.findFirst({
+            where: { userId: 1, name: "Nature"}
+        });
+        
+        // Post words to that category
+        await request(testApp)
+            .post(`/user/languages/en-kr/words/bulk`)
+            .send({
+                words: [{
+                    l1Word: "tree",
+                    l2Word: "나무",
+                    example: "",
+                    categories: ["nature"]
+                },
+                {
+                    l1Word: "snow",
+                    l2Word: "눈",
+                    example: "",
+                    categories: ["nature"]
+                }
+            ]
+            })
+            .expect("Content-type", /json/)
+            .expect(200);
+
+        // Delete the category "Nature"
+        const response = await request(testApp)
+            .delete(`/user/languages/en-kr/categories/${category.id}`);
+        
+        // Expect response body property:
+        expect(response.body).toHaveProperty("message");
+
+        // Access the added words
+        const words= await prisma.word.findMany({
+            where: { languageId: 1, userId: 1}
+        });
+
+        // Ensure they still exist (under default category)
+        expect(words.length).toBeGreaterThan(0);
+
+        // Delete the test words
+        await prisma.word.deleteMany({
+            where: {
+                id: { in: words.map(w => w.id)}
+            }
+        })
     })
 })
 
