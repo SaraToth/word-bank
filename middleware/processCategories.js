@@ -1,6 +1,7 @@
 const prisma = require("../prisma/client");
 const asyncHandler = require("express-async-handler");
 const slugifyText = require("../utils/slugifyText");
+const toProperNoun = require("../utils/toProperNoun");
 
 const processCategories = asyncHandler( async(req, res, next) => {
     //Access the word from form (as single object in an array)
@@ -12,13 +13,13 @@ const processCategories = asyncHandler( async(req, res, next) => {
     });
 
     for (const catName of word.categories) {
-        let category = existingCategories.find(category => category.name === catName);
+        let category = existingCategories.find(category => category.name === toProperNoun(catName));
 
         if (!category) {
             // Create category if it doesn't exist
             category = await prisma.category.create({
                 data: {
-                    name: catName,
+                    name: toProperNoun(catName),
                     userId: req.userId,
                     languageId: req.pairId,
                     type: "CUSTOM",
