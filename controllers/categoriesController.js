@@ -231,6 +231,7 @@ const patchCategory = [
  *  - 200 { message: String } - successful deletion
  */
 const deleteCategory = asyncHandler( async(req, res) => {
+
     const categoryId = parseInt(req.params.categoryId);
 
     // Confirm categoryId is provided
@@ -240,7 +241,8 @@ const deleteCategory = asyncHandler( async(req, res) => {
 
     // Retrieve category
     const category = await prisma.category.findFirst({
-        where: { id: categoryId, languageId: req.pairId }
+        where: { id: categoryId, languageId: req.pairId },
+        include: { words: true}
     });
 
     // Confirm category exists in db
