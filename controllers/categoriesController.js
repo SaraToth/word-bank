@@ -258,6 +258,17 @@ const deleteCategory = asyncHandler( async(req, res) => {
         return res.status(403).json({ error: "Forbidden. Default category 'My Words' cannot be deleted"});
     }
 
+    // Update words in that category
+    await prisma.category.update({
+        where: { id: category.id },
+        data: {
+            words: {
+                // Disconnect all words currently in the category
+                disconnect: category.words.map(word => ({ id: word.id }))
+            }
+        }
+    });
+
     // Delete category
     await prisma.category.delete({
         where: { id: category.id}
