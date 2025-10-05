@@ -26,9 +26,11 @@ const bulkWords = [
     }
 ];
 
+// Routes for mocking
 const userRouter = require("../routes/userRouter");
 const categoriesRouter = require("../routes/categoriesRouter");
 const wordsRouter = require("../routes/wordsRouter");
+
 const request = require("supertest");
 const express = require("express");
 require("dotenv").config();
@@ -44,8 +46,8 @@ testApp.use(express.urlencoded({ extended: true}));
 
 // Route for testing
 testApp.use("/user", userRouter);
-testApp.use("/user/languages/:pairId/categories", categoriesRouter)
-testApp.use("/user/languages/:pairId/categories/:categoryId/words", wordsRouter);
+testApp.use("/user/languages/:languagesSlug/categories", categoriesRouter)
+testApp.use("/user/languages/:languagesSlug/words", wordsRouter);
 
 testApp.use((err, req, res, next) => {
   console.error(err);
@@ -55,7 +57,7 @@ testApp.use((err, req, res, next) => {
 describe("POST add word", () => {
     it("Fails if validation fails", async() => {
         const response = await request(testApp)
-            .post("/user/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/words")
             .send({
                 words: [{
                     l1Word: "안녕하세요",
@@ -75,7 +77,7 @@ describe("POST add word", () => {
 
     it("Succesfully creates a new word", async() => {
         const response = await request(testApp)
-            .post("/user/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/words")
             .send({
                 words: [{
                     l1Word: "hello",
@@ -103,7 +105,7 @@ describe("POST add word", () => {
 
     it("Succesfully creates a new word with no example", async() => {
         const response = await request(testApp)
-            .post("/user/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/words")
             .send({
                 words: [{
                     l1Word: "fruit",
@@ -135,7 +137,7 @@ describe("POST add word", () => {
         expect(categories.length).toBe(1);
 
         const response = await request(testApp)
-            .post("/user/languages/en-kr/categories/1/words")
+            .post("/user/languages/en-kr/words")
             .send({
                 words: [{
                     l1Word: "fruit",
@@ -244,7 +246,7 @@ describe("POST bulk add words", () => {
         expect(oldCategories.length).toBe(1);
 
         const response = await request(testApp)
-            .post("/user/languages/en-kr/categories/1/words/bulk")
+            .post("/user/languages/en-kr/words/bulk")
             .send({
                 words: [{
                     l1Word: "tree",
