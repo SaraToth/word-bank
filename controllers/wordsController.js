@@ -16,50 +16,67 @@ const addWord = [
         // Access the word from form (as single object in an array)
         const word = req.body.words[0];
 
-        // Ensure categoryIds is an array
-        const categoryIds = word.categories ? [...word.categories] : [];
+        // Get processed categoryIds (Which always contains default categoryId);
+        const categoryIds = req.body.words[0].categoryIds;
 
-        // Confirm l2word (foreign language word) doesn't exist already for that user and languagePair
-        const check = await prisma.word.findFirst({
-            where: { 
+        // Check for duplicate
+        const existing = await prisma.word.findFirst({
+            where: {
                 l2Word: word.l2Word, 
                 userId: req.userId,
-                languageId: req.pairId}
-        });
-        if (check) {
-            return res.status(400).json({ error: "Bad request: that word is already in your dictionary"});
-        }
-
-        // Get the default folder for that languagePair
-        const defaultCategory = await prisma.category.findFirst({
-            where: { 
-                userId: req.userId,
                 languageId: req.pairId,
-                type: "DEFAULT"
+            },
+            include: {
+                categories: true // fetch existing categories
             }
         });
 
-        // Add default categoryId
-        categoryIds.push(defaultCategory.id);
+        if(existing) {
+            // Get the categoryIds the word belongs to
+            const existingCategoryIds = existing.categories.map(category => category.id);
+            // Filter the categorys user wants to add word to
+            const missingCategoryIds = categoryIds.filter(
+                id => !existingCategoryIds.includes(id)
+            );
 
-        // Create the new word
-        const newWord = await prisma.word.create({
-            data: {
-                userId: req.userId,
-                languageId: req.pairId,
-                l1Word: word.l1Word,
-                l2Word: word.l2Word,
-                example: word.example || null,
-                categories: {
-                    connect: categoryIds.map(id => ({ id }))
+            // If there are categories that don't have the word add it:
+            if (missingCategoryIds.length > 0) {
+                await prisma.word.update({
+                    where: { id: existing.id},
+                    data: {
+                        categories: {
+                            connect: missingCategoryIds.map(id => ({ id }))
+                        }
+                    }
+                });
+
+            return res.status(200).json({ 
+                message: `${word.l2Word} already exists but was succesfully updated with new categories`
+            });
+            }
+        } else {
+            // Create the new word
+            await prisma.word.create({
+                data: {
+                    userId: req.userId,
+                    languageId: req.pairId,
+                    l1Word: word.l1Word,
+                    l2Word: word.l2Word,
+                    example: word.example || null,
+                    categories: {
+                        connect: categoryIds.map(id => ({ id }))
+                    }
                 }
-            },
-            select: { id: true, l1Word: true, l2Word: true, example: true }
-        });
+            });
 
+            return res.status(201).json({
+                message: `${word.l2Word} was successfully created`
+            });
+        }
+
+        // When word already exists and has no updates:
         return res.status(200).json({
-            message: `Succesfully added ${word.l2Word} to current category`,
-            word: newWord
+            message: `${word.l2Word} already exists for those provided categories.`
         });
     })
 ];
@@ -70,7 +87,7 @@ const bulkAddWords = asyncHandler( async(req, res) => {
     const { words } = req.body;
 
     for (const word of words) {
-        const { l1Word, l2Word, example, categories, categoryIds } = word;
+        const { l1Word, l2Word, example } = word;
 
         // Check for duplicate
         const existing = await prisma.word.findFirst({
@@ -112,7 +129,7 @@ const bulkAddWords = asyncHandler( async(req, res) => {
                 languageId: req.pairId,
                 l1Word,
                 l2Word,
-                example: word.example || null,
+                example: example || null,
                 categories: {
                     connect: word.categoryIds.map(id => ({ id }))
                 }
