@@ -276,16 +276,20 @@ describe("Delete an existing category", () => {
         const response = await request(testApp)
             .post("/user/languages/en-kr/categories")
             .send({
-                category: "This is for deleting"
+                category: "cookie"
             })
             .expect("Content-type", /json/)
             .expect(200);
         
-        // Delete category
+        expect(response.body.category.name).toBe("Cookie");
+        
+        // Get category id
         const id = response.body.category.id;
-        await prisma.category.delete({
-            where: { id: id}
-        });
+
+        await request(testApp)
+            .delete(`/user/languages/en-kr/categories/${id}`)
+            .expect("Content-type", /json/)
+            .expect(200);
 
         // Confirm deletion
         const check = await prisma.category.findFirst({
