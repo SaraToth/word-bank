@@ -10,8 +10,7 @@
     "test:user": "NODE_ENV=test jest __tests__/userRouter.test.js",
     "test:cat": "NODE_ENV=test jest __tests__/categoriesRouter.test.js",
     "test:word": "NODE_ENV=test jest __tests__/wordsRouter.test.js",
-    "db:reset": "prisma migrate reset prisma/seed.js",
-    "db:reset:test": "NODE_ENV=test prisma migrate reset prisma/tests_seed.js"
+    "db:reset": "prisma migrate reset prisma/seed.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js",
